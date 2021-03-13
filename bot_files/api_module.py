@@ -51,13 +51,18 @@ async def search_and_decode_el(token) -> dict:
 	for i in temp_memory_array:
 		if i[0] == token:
 			el = i[1]
-			p = el["pagemap"]
+			pagemap = True
+			try:
+				p = el["pagemap"]
+			except Exception as e:
+				logging.error(e)
+				pagemap = False
 			array = [
 				el["link"],
 				el["htmlTitle"],
 				el["snippet"].replace('\n', ' '),
 			]
-			if p:
+			if pagemap:
 				img_get = True
 				try:
 					if p["cse_image"]:
