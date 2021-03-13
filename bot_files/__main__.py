@@ -51,39 +51,33 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 		await bot.send_chat_action(callback_query.from_user.id, 'typing')
 		el = await search_and_decode_el(token)
 		if el:
-			try:
-				await bot.send_message(
-					chat_id=callback_query.from_user.id,
-					text=msg.search_data_send_template % (
-						el[0], el[1], el[2]
-					),
-					disable_web_page_preview=True,
-					reply_markup=await menu(callback_query),
-				)
+			me = await bot.get_me()
+			await bot.send_message(
+				chat_id=callback_query.from_user.id,
+				text=msg.search_data_send_template % (
+					el[0], el[1], el[2], f'@{me.username}'
+				),
+				disable_web_page_preview=True,
+				reply_markup=await menu(callback_query),
+			)
 
-				d = callback_query.data
-				buttons = callback_query.message.reply_markup
-				button_name = await get_button_name(d, buttons)
-				message = callback_query
+			d = callback_query.data
+			buttons = callback_query.message.reply_markup
+			button_name = await get_button_name(d, buttons)
+			message = callback_query
 
-				await send_admins_msg(
-					'Вибір',
-					message.from_user.username,
-					message.from_user.full_name,
-					message.from_user.id,
-					button_name,
-				)
+			await send_admins_msg(
+				'Вибір',
+				message.from_user.username,
+				message.from_user.full_name,
+				message.from_user.id,
+				button_name,
+			)
 
-				await bot.answer_callback_query(
-					callback_query.id,
-					text=msg.button_inline_notify % button_name,
-				)
-			except Exception as e:
-				logging.error(e)
-				await bot.answer_callback_query(
-					callback_query.id,
-					text=msg.button_inline_error,
-				)
+			await bot.answer_callback_query(
+				callback_query.id,
+				text=msg.button_inline_notify % button_name,
+			)
 		else:
 			await bot.answer_callback_query(
 				callback_query.id,
@@ -151,10 +145,13 @@ async def send_admins_msg(type, pseudo, fullname, user_id, text) -> None:
 			if button:
 				pass
 			else:
-				await bot.send_message(
-					chat_id=i,
-					text='[%s] %s (%s) "%s"' % (type, fullname, pseudo, text),
-				)
+				try:
+					await bot.send_message(
+						chat_id=i,
+						text='[%s] %s (%s) "%s"' % (type, fullname, pseudo, text),
+					)
+				except Exception as e:
+					logging.error(e)
 
 
 @dp.message_handler(state=AdminStates.contact_admin)

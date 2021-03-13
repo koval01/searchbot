@@ -33,6 +33,8 @@ search_data_send_template = """
 <a href="%s"><b>%s</b></a>
 
 %s
+
+%s
 """
 
 async def check_user_msg(string) -> str:
