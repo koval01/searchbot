@@ -13,6 +13,8 @@ api_key = [
     'AIzaSyCTHkOgSOl_l6lgWM-qihAG5S3fowB10Ic',
     'AIzaSyDv-kQ__Id9uq0zdk9em5KL5jTASA7t8RQ',
     'AIzaSyDMjeAF2l5-ENbqexMSFuLj1itddYBWAF4',
+    'AIzaSyChdbNTHGloGgY3JWioyETE9rMJGR0_cVA',
+    'AIzaSyB1YEgIzKT_Dp_ZNYDpLWrdgVSevzHXfPc',
 ]
 cx = '6eeb925d66ac99896'
 

@@ -9,9 +9,10 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from api_module import data_get, data_prepare, cleanhtml, search_and_decode_el, title_cut
+from api_module import data_get, data_prepare, cleanhtml, search_and_decode_el, title_cut, check_admin
 from sqlcontroller import SQLight
-from buttons import create_inline_buttons, menu, cancel
+from buttons import create_inline_buttons, cancel, append_button_to_keyboard_dict_buttons
+from buttons import menu as menu_original
 
 
 logging.basicConfig(format=config.format_logging, level=logging.INFO)
@@ -28,6 +29,7 @@ db = SQLight(db_path)
 
 class AdminStates(StatesGroup):
 	contact_admin = State()
+	admin_ad_menu = State()
 
 
 @dp.callback_query_handler(lambda call_back: call_back.data == re.search(r"inline_data:\S*", call_back.data)[0])
@@ -55,7 +57,7 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 					el[0], el[1], el[2]
 				),
 				disable_web_page_preview=True,
-				reply_markup=menu,
+				reply_markup=await menu(callback_query),
 			)
 
 			d = callback_query.data
@@ -73,7 +75,7 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 
 			await bot.answer_callback_query(
 				callback_query.id,
-				text=msg.button_inline_notify,
+				text=msg.button_inline_notify % button_name,
 			)
 		else:
 			await bot.answer_callback_query(
@@ -95,12 +97,27 @@ async def get_button_name(data, buttons) -> str:
 			return buttons["inline_keyboard"][i][0]['text']
 
 
+async def menu(message) -> dict:
+	"""
+	Функція, що повертає персоналізоване меню
+	:param message: Тіло повідомлення
+	:return: Меню
+	"""
+	a_result = await check_admin(message)
+	edited_menu = menu_original
+	if a_result:
+		edited_menu = await append_button_to_keyboard_dict_buttons(
+			edited_menu, 'Реклама'
+		)
+	return edited_menu
+
+
 @dp.message_handler(commands=['start'])
 async def subscribe(message: types.Message):
 	if not db.subscriber_exists(message.from_user.id):
 		db.add_subscriber(message.from_user.id, message.from_user.full_name)
 		logging.info("Save user [ID: %s] [FULL_NAME: %s]" % (message.from_user.id, message.from_user.full_name))
-	await message.answer(msg.start_message, reply_markup=menu)
+	await message.answer(msg.start_message,  reply_markup=await menu(message))
 
 
 async def send_admins_msg(type, pseudo, fullname, user_id, text) -> None:
@@ -138,14 +155,14 @@ async def state_check_func_ntf(message: types.Message, state: FSMContext):
 	cancel = False
 
 	if message.text == 'Скасувати':
-		await message.reply(msg.cancel_msg, reply_markup=menu)
+		await message.reply(msg.cancel_msg,  reply_markup=await menu(message))
 		cancel = True
 
 	if not cancel:
-		if len(message.text) < 1000:
+		if len(message.text) < 1001:
 			sentence_check = await check_user_msg(message.text)
 			if sentence_check:
-				await message.reply(sentence_check, reply_markup=menu)
+				await message.reply(sentence_check,  reply_markup=await menu(message))
 			else:
 				await send_admins_msg(
 					'Зворотній зв\'язок',
@@ -154,9 +171,23 @@ async def state_check_func_ntf(message: types.Message, state: FSMContext):
 					message.from_user.id,
 					message.text,
 				)
-				await message.reply(msg.message_sent, reply_markup=menu)
+				await message.reply(msg.message_sent,  reply_markup=await menu(message))
 		else:
-			await message.reply(msg.long_msg, reply_markup=menu)
+			await message.reply(msg.long_msg,  reply_markup=await menu(message))
+
+	return await state.finish()
+
+
+@dp.message_handler(state=AdminStates.admin_ad_menu)
+async def state_check_func_ntf(message: types.Message, state: FSMContext):
+	cancel = False
+
+	if message.text == 'Скасувати':
+		await message.reply(msg.cancel_msg,  reply_markup=await menu(message))
+		cancel = True
+
+	if not cancel:
+		await message.reply('Ця функція ще в розробці. Текст - "%s"' % message.text,  reply_markup=await menu(message))
 
 	return await state.finish()
 
@@ -171,36 +202,44 @@ async def handle_message_received_text(message):
 		except Throttled:
 			pass
 		else:
-			await message.reply(msg.slowly_pleas, reply_markup=menu)
+			await message.reply(msg.slowly_pleas,  reply_markup=await menu(message))
 	else:
-		if message.text == 'Зворотній зв\'язок':
-			await message.reply(msg.contact_help, reply_markup=cancel)
-			await AdminStates.contact_admin.set()
-		elif not message.is_command() and len(message.text) < 2500:
-			x = await data_get(message.text)
-			x = await data_prepare(x)
-			if x:
-				buttons = await create_inline_buttons(x[1:])
-				template_items = x[0]
-				title = await cleanhtml(message.text)
-				title = await title_cut(title)
-				await message.reply(msg.search_done_msg % (
-					title,
-					template_items['TotalResults'],
-					len(x) - 1,
-					template_items['SearchTime'],
-				), reply_markup=buttons)
-				await send_admins_msg(
-					'Пошук',
-					message.from_user.username,
-					message.from_user.full_name,
-					message.from_user.id,
-					title,
-				)
-			else:
-				await message.reply(msg.unknown_error, reply_markup=menu)
+		if db.subscriber_get_from_user_id(message.from_user.id)[0][5]:
+			await message.reply(msg.ban_message,  reply_markup=await menu(message))
 		else:
-			await message.reply(msg.long_msg, reply_markup=menu)
+			a_result = await check_admin(message)
+			if message.text == 'Зворотній зв\'язок':
+				await message.reply(msg.contact_help, reply_markup=cancel)
+				await AdminStates.contact_admin.set()
+			elif message.text == 'Реклама' and a_result:
+				await message.reply(msg.admin_ad_help, reply_markup=cancel)
+				await AdminStates.admin_ad_menu.set()
+			elif not message.is_command() and len(message.text) < 2000:
+				await bot.send_chat_action(message.from_user.id, 'typing')
+				x = await data_get(message.text)
+				x = await data_prepare(x)
+				if x:
+					buttons = await create_inline_buttons(x[1:])
+					template_items = x[0]
+					title = await cleanhtml(message.text)
+					title = await title_cut(title)
+					await message.reply(msg.search_done_msg % (
+						title,
+						template_items['TotalResults'],
+						len(x) - 1,
+						template_items['SearchTime'],
+					), reply_markup=buttons)
+					await send_admins_msg(
+						'Пошук',
+						message.from_user.username,
+						message.from_user.full_name,
+						message.from_user.id,
+						title,
+					)
+				else:
+					await message.reply(msg.unknown_error,  reply_markup=await menu(message))
+			else:
+				await message.reply(msg.long_msg,  reply_markup=await menu(message))
 
 
 if __name__ == '__main__':

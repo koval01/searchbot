@@ -1,6 +1,6 @@
 import aiohttp, logging, json, string, re
 from random import choice, randint, shuffle
-from config import api_host_search, api_key, cx
+from config import api_host_search, api_key, cx, admins
 
 
 temp_memory_array = []
@@ -19,7 +19,7 @@ async def data_get(question) -> dict:
 			"cx": cx,
 			"q": q,
 		}) as response:
-			if response.status == 200:
+			if response.status == 200 and await response.text():
 				return json.loads(await response.text())
 
 
@@ -55,7 +55,7 @@ async def search_and_decode_el(token) -> dict:
 			array = [
 				el["link"],
 				el["htmlTitle"],
-				el["snippet"],
+				el["snippet"].replace('\n', ' '),
 			]
 			if p:
 				img_get = True
@@ -102,3 +102,13 @@ async def title_cut(title) -> str:
 	if len(title) > 120:
 		title = title[:120]+'...'
 	return title
+
+
+async def check_admin(message) -> bool:
+	"""
+	Перевірка прав адміністратора
+	:param message: Message body
+	:return: bool result
+	"""
+	if str(message.from_user.id) in admins:
+		return True
