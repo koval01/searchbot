@@ -62,6 +62,26 @@ class SQLight:
             return self.cursor.execute("UPDATE `subscriptions` SET `status` = ? WHERE `user_id` = ?", (status, user_id))
 
 
+    def update_lang(self, user_id, lang=1) -> None:
+        """
+        Оновлення мови визначенного користувача
+        :return: None
+        """
+        # 0 UA; 1 RU; 2 EN
+        with self.connection:
+            return self.cursor.execute("UPDATE `subscriptions` SET `lang` = ? WHERE `user_id` = ?", (lang, user_id))
+
+
+    def subscriber_get_lang(self, user_id) -> dict:
+        """
+        Функція для отримання мови користувача
+        :return: dict
+        """
+        with self.connection:
+            result = self.cursor.execute('SELECT `lang` FROM `subscriptions` WHERE `user_id` = ?', (user_id,)).fetchall()
+            return result[0][0]
+
+
     def add_contact_ticket(self, pseudo, fullname, user_id, text) -> dict:
         """
         Додавання новго тікета

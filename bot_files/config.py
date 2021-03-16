@@ -2,7 +2,6 @@ API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc'
 
 admins = [
     '542956255',
-    '981371149',
 ]
 
 format_logging = u'%(filename)+18s [ LINE:%(lineno)-5s] %(levelname)-8s [%(asctime)s] %(message)s'
