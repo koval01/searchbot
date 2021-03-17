@@ -112,6 +112,7 @@ async def title_cut(title) -> str:
 async def check_admin(message) -> bool:
 	"""
 	Перевірка прав адміністратора
+	:rtype: object
 	:param message: Message body
 	:return: bool result
 	"""

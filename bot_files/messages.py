@@ -78,20 +78,35 @@ search_data_send_template = [
     '<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
     '<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
 ]
+cancel_btns = [
+    'Скасувати',
+    'Отмена',
+    'Cancel',
+]
+support_btns = [
+    'Допомога',
+    'Помощь',
+    'Help',
+]
+menu_btns = [
+    [support_btns[0], 'Реклама'],
+    [support_btns[1], 'Реклама'],
+    [support_btns[2], 'Ad'],
+]
 
-async def check_user_msg(string) -> str:
+async def check_user_msg(string, ln) -> str:
     """
     Перевірка тексту користувача
     :param string: Строка яку потрібно перевірити
     :return: Результат
     """
     if len(string) > 1000:
-        return long_msg
+        return long_msg[ln]
     elif len(string) < 29:
-        return short_msg
+        return short_msg[ln]
     elif len(string.split()) < 10:
-        return error_sentences
+        return error_sentences[ln]
     else:
         for i in string.split():
             if len(i) > 24:
-                return error_sentences
+                return error_sentences[ln]

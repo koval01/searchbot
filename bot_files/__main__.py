@@ -1,4 +1,4 @@
-import config, logging, re, os
+import config, logging, os
 from asyncio import get_event_loop
 import messages as msg
 from messages import check_user_msg
@@ -32,7 +32,21 @@ class AdminStates(StatesGroup):
 	admin_ad_menu = State()
 
 
-@dp.callback_query_handler(lambda call_back: call_back.data == re.search(r"inline_data:\S*", call_back.data)[0])
+@dp.callback_query_handler(lambda call_back: 'select_lang:' in call_back.data)
+async def process_callback_button1(callback_query: types.CallbackQuery):
+	ln = int(callback_query.data.replace('select_lang:', ''))
+	db.update_lang(
+		callback_query.from_user.id, ln
+	)
+	await bot.send_message(
+		callback_query.from_user.id,
+		msg.start_message[ln],
+			reply_markup=await menu(callback_query)
+	)
+	await bot.answer_callback_query(callback_query.id)
+
+
+@dp.callback_query_handler(lambda call_back: 'inline_data:' in call_back.data)
 async def process_callback_button1(callback_query: types.CallbackQuery):
 	ln = db.subscriber_get_lang(callback_query.from_user.id)
 	try:
@@ -119,13 +133,28 @@ async def menu(message) -> dict:
 	:param message: Тіло повідомлення
 	:return: Меню
 	"""
+	ln = db.subscriber_get_lang(message.from_user.id)
+
 	a_result = await check_admin(message)
 	edited_menu = menu_original
+	edited_menu['keyboard'][0][0]['text'] = msg.support_btns[ln]
 	if a_result:
 		edited_menu = await append_button_to_keyboard_dict_buttons(
-			edited_menu, 'Реклама'
+			edited_menu, msg.menu_btns[ln][1]
 		)
 	return edited_menu
+
+
+async def cancel_menu(message) -> dict:
+	"""
+	Функція для стоврення кнопки "скасувати" відповідно обраної мови
+	:param message: Тіло повідомлення
+	:return: dict
+	"""
+	c = cancel
+	ln = db.subscriber_get_lang(message.from_user.id)
+	c['keyboard'][0][0]['text'] = msg.cancel_btns[ln]
+	return c
 
 
 @dp.message_handler(commands=['start'])
@@ -135,7 +164,7 @@ async def subscribe(message: types.Message):
 		logging.info("Save user [ID: %s] [FULL_NAME: %s]" % (message.from_user.id, message.from_user.full_name))
 		await lang_select(message)
 	else:
-		await message.answer(msg.start_message[db.subscriber_get_lang(message.from_user.id)],  reply_markup=await menu(message))
+		await message.answer(msg.start_message[db.subscriber_get_lang(message.from_user.id)], reply_markup=await menu(message))
 
 
 @dp.message_handler(commands=['lang'])
@@ -158,7 +187,7 @@ async def send_admins_msg(type, pseudo, fullname, user_id, text) -> None:
 		pseudo = 'Немає псевдоніму'
 	else:
 		pseudo = f'@{pseudo}'
-	if type == 'Зворотній зв\'язок':
+	if type == 'Support':
 		db.add_contact_ticket(pseudo, fullname, user_id, text)
 		# request_id = db.add_contact_ticket(pseudo, fullname, user_id, text)[0][0]
 		# button = await create_inline_buttons(['Не розглянуто', 'admin_ticket:%s' % request_id])
@@ -180,13 +209,13 @@ async def send_admins_msg(type, pseudo, fullname, user_id, text) -> None:
 async def state_check_func_ntf(message: types.Message, state: FSMContext):
 	cancel = False
 	ln = db.subscriber_get_lang(message.from_user.id)
-	if message.text == 'Скасувати':
+	if message.text == msg.cancel_btns[ln]:
 		await message.reply(msg.cancel_msg[ln],  reply_markup=await menu(message))
 		cancel = True
 
 	if not cancel:
 		if len(message.text) < 1001:
-			sentence_check = await check_user_msg(message.text)
+			sentence_check = await check_user_msg(message.text, ln)
 			if sentence_check:
 				await message.reply(sentence_check,  reply_markup=await menu(message))
 			else:
@@ -208,7 +237,7 @@ async def state_check_func_ntf(message: types.Message, state: FSMContext):
 async def state_check_func_ntf(message: types.Message, state: FSMContext):
 	cancel = False
 	ln = db.subscriber_get_lang(message.from_user.id)
-	if message.text == 'Скасувати':
+	if message.text == msg.cancel_btns[ln]:
 		await message.reply(msg.cancel_msg[ln],  reply_markup=await menu(message))
 		cancel = True
 
@@ -235,11 +264,11 @@ async def handle_message_received_text(message):
 			await message.reply(msg.ban_message[ln],  reply_markup=await menu(message))
 		else:
 			a_result = await check_admin(message)
-			if message.text == 'Зворотній зв\'язок':
-				await message.reply(msg.contact_help[ln], reply_markup=cancel)
+			if message.text == msg.menu_btns[ln][0]:
+				await message.reply(msg.contact_help[ln], reply_markup=await cancel_menu(message))
 				await AdminStates.contact_admin.set()
-			elif message.text == 'Реклама' and a_result:
-				await message.reply(msg.admin_ad_help[ln], reply_markup=cancel)
+			elif message.text == msg.menu_btns[ln][1] and a_result:
+				await message.reply(msg.admin_ad_help[ln], reply_markup=await cancel_menu(message))
 				await AdminStates.admin_ad_menu.set()
 			elif not message.is_command() and len(message.text) < 2000:
 				await bot.send_chat_action(message.from_user.id, 'typing')
