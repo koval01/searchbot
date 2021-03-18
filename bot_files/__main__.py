@@ -1,5 +1,6 @@
 import config, logging, os
 from asyncio import get_event_loop
+
 import messages as msg
 from messages import check_user_msg
 
@@ -9,8 +10,13 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
-from api_module import data_get, data_prepare, cleanhtml, search_and_decode_el, title_cut, check_admin
+
+from api_module import (
+	data_get, data_prepare, cleanhtml, search_and_decode_el,
+	title_cut, check_admin, random_news)
+
 from sqlcontroller import SQLight
+
 from buttons import create_inline_buttons, cancel, append_button_to_keyboard_dict_buttons
 from buttons import menu as menu_original
 

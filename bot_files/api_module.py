@@ -1,6 +1,6 @@
 import aiohttp, logging, json, string, re
 from random import choice, randint, shuffle
-from config import api_host_search, api_key, cx, admins
+from config import api_host_search, api_key, cx, admins, news_api_key
 
 
 temp_memory_array = []
@@ -118,3 +118,52 @@ async def check_admin(message) -> bool:
 	"""
 	if str(message.from_user.id) in admins:
 		return True
+
+
+async def news_request(ln) -> dict:
+	"""
+	Функція запиту до News API
+	:param ln: Мовний код
+	:return: dict news
+	"""
+	url = 'https://rapid-art.koval.workers.dev/'
+	shuffle(news_api_key)
+	cnt = ['ua', 'ru', 'us']
+	for i, e in enumerate(news_api_key):
+		async with aiohttp.request('GET', url, params={
+			"apiKey": news_api_key[i],
+			"country": cnt[ln]
+		}) as response:
+			if response.status == 200 and await response.text():
+				return json.loads(await response.text()['articles'])
+
+
+async def random_news(ln) -> dict:
+	"""
+	Функція для отримання випадкової новини на потрібній мові
+	:param ln: Мовний код
+	:return: Словник з данними про новину
+	"""
+	data = await news_request(ln)
+	if data:
+		shuffle(data)
+		title = text_news_filter(data[0]['title'])
+		description = text_news_filter(data[0]['description'])
+		array = [
+			title,
+			description,
+			data[0]['source']['name'],
+			data[0]['url'],
+			data[0]['urlToImage'],
+		]
+		return array
+
+
+async def text_news_filter(string) -> str:
+	"""
+	Функція для підготовки тексту новини
+	:param string: Вхідна строка
+	:return: Оброблена строка
+	"""
+	string = str(string).replace('https://', '').replace('http://', '')
+	return string.replace('&raquo;', '').replace('&laquo;', '').replace('&nbsp;', '')
