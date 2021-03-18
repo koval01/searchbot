@@ -166,4 +166,4 @@ async def text_news_filter(string) -> str:
 	:return: Оброблена строка
 	"""
 	string = str(string).replace('https://', '').replace('http://', '')
-	return string.replace('&raquo;', '').replace('&laquo;', '').replace('&nbsp;', '')
+	return await cleanhtml(string.replace('&raquo;', '').replace('&laquo;', '').replace('&nbsp;', ''))
