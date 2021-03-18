@@ -1,6 +1,5 @@
 import config, logging, os
 from asyncio import get_event_loop
-import aioschedule
 
 import messages as msg
 from messages import check_user_msg
@@ -14,11 +13,15 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from api_module import (
 	data_get, data_prepare, cleanhtml, search_and_decode_el,
-	title_cut, check_admin, random_news)
+	title_cut, check_admin, random_news, check_news_search
+)
 
 from sqlcontroller import SQLight
 
-from buttons import create_inline_buttons, cancel, append_button_to_keyboard_dict_buttons
+from buttons import (
+	create_inline_buttons, cancel,
+	append_button_to_keyboard_dict_buttons, append_button_to_inline_dict_buttons
+)
 from buttons import menu as menu_original
 
 
@@ -282,10 +285,21 @@ async def handle_message_received_text(message):
 				x = await data_get(message.text)
 				x = await data_prepare(x)
 				if x:
-					buttons = await create_inline_buttons(x[1:])
 					template_items = x[0]
 					title = await cleanhtml(message.text)
 					title = await title_cut(title)
+					nw = await check_news_search(message.text)
+					if nw:
+						nw_button = msg.news_button[ln]
+						buttons = await create_inline_buttons(
+							[nw_button, 'aware_news']
+						)
+						for i in x[1:]:
+							buttons = await append_button_to_inline_dict_buttons(
+								buttons, i
+							)
+					else:
+						buttons = await create_inline_buttons(x[1:])
 					await message.reply(msg.search_done_msg[ln] % (
 						title,
 						template_items['TotalResults'],
