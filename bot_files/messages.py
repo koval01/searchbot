@@ -98,6 +98,11 @@ news_button = [
     'Новости AWARE',
     'News AWARE',
 ]
+news_no = [
+    'Наразі немає більше новин. Новини оновлюються приблизно раз в добу. Чекаю на тебе завтра.',
+    'Пока нет больше новостей. Новости обновляются примерно раз в сутки. Жду тебя завтра.',
+    'There is no more news at this time. The news is updated about once a day. I\'m waiting for you tomorrow.',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

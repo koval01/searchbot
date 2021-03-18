@@ -37,6 +37,8 @@ dp.middleware.setup(LoggingMiddleware())
 db_path = os.path.abspath("db.db")
 db = SQLight(db_path)
 
+news_array = []
+
 class AdminStates(StatesGroup):
 	contact_admin = State()
 	admin_ad_menu = State()
@@ -110,9 +112,27 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 			)
 
 
-@dp.callback_query_handler(lambda call_back: call_back.data == 'aware_news')
+@dp.callback_query_handler(lambda call_back: 'aware_news:' in call_back.data)
 async def process_callback_button1(callback_query: types.CallbackQuery):
-	ln = int(callback_query.data.replace('select_lang:', ''))
+	token = int(callback_query.data.replace('aware_news:', ''))
+	ln = db.subscriber_get_lang(callback_query.from_user.id)
+	if not token:
+		try:
+			await dp.throttle('text', rate=7200)
+		except Throttled:
+			await bot.send_message(
+				callback_query.from_user.id,
+				msg.news_no[ln],
+			)
+		else:
+			news_data = await random_news(ln)
+			global news_array
+			news_array.append(
+				[
+					callback_query.from_user.id,
+					news_data,
+				]
+			)
 	db.update_lang(
 		callback_query.from_user.id, ln
 	)
@@ -307,7 +327,7 @@ async def handle_message_received_text(message):
 					if nw:
 						nw_button = msg.news_button[ln]
 						buttons = await create_inline_buttons(
-							[[nw_button, 'aware_news']]
+							[[nw_button, 'aware_news:0']]
 						)
 						for i in x[1:]:
 							buttons = await append_button_to_inline_dict_buttons(
