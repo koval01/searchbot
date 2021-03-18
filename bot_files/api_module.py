@@ -132,7 +132,8 @@ async def news_request(ln) -> dict:
 	for i, e in enumerate(news_api_key):
 		async with aiohttp.request('GET', url, params={
 			"apiKey": news_api_key[i],
-			"country": cnt[ln]
+			"country": cnt[ln],
+			"category": 'general',
 		}) as response:
 			if response.status == 200 and await response.text():
 				return json.loads(await response.text()['articles'])

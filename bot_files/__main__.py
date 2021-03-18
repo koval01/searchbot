@@ -110,6 +110,20 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 			)
 
 
+@dp.callback_query_handler(lambda call_back: call_back.data == 'aware_news')
+async def process_callback_button1(callback_query: types.CallbackQuery):
+	ln = int(callback_query.data.replace('select_lang:', ''))
+	db.update_lang(
+		callback_query.from_user.id, ln
+	)
+	await bot.send_message(
+		callback_query.from_user.id,
+		msg.start_message[ln],
+			reply_markup=await menu(callback_query)
+	)
+	await bot.answer_callback_query(callback_query.id)
+
+
 async def get_button_name(data, buttons) -> str:
 	"""
 	Функція для отримання з каллбеку назви кнопки
