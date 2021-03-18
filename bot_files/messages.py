@@ -10,7 +10,7 @@ slowly_pleas = [
 ]
 unknown_error = [
     'Я не зміг нічого знайти за твоїм запитом, пробач.',
-    'Я не смог ничего найти по твоим запросу, прости.',
+    'Я не смог ничего найти по твоему запросу, прости.',
     'I could not find anything for your request, sorry.',
 ]
 button_inline_notify = [

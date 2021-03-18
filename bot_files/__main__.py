@@ -296,7 +296,8 @@ async def handle_message_received_text(message):
 				await AdminStates.admin_ad_menu.set()
 			elif not message.is_command() and len(message.text) < 2000:
 				await bot.send_chat_action(message.from_user.id, 'typing')
-				x = await data_get(message.text)
+				text = message.text.replace('@', '')
+				x = await data_get(text)
 				x = await data_prepare(x)
 				if x:
 					template_items = x[0]
