@@ -171,4 +171,4 @@ async def text_news_filter(string) -> str:
 
 async def check_news_search(string) -> bool:
 	if news_check_words in string:
-		pass
+		return True
