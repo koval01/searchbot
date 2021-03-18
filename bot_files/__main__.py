@@ -1,5 +1,6 @@
 import config, logging, os
 from asyncio import get_event_loop
+import aioschedule
 
 import messages as msg
 from messages import check_user_msg
