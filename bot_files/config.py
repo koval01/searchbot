@@ -22,5 +22,10 @@ api_key = [
     'AIzaSyB5i8FBvyWjPVvjF9RZLIc_lVi1arfdCP0',
 ]
 cx = '6eeb925d66ac99896'
+news_api_key = [
+    'a96688b700f041999a06916d7d52ef1b',
+    '933c91dd12af485eb98981a59801486e',
+    '6990e000cee64ff98aa5f69e57201c44',
+]
 
 user_agent_static = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4442.4 Safari/537.36'
