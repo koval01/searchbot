@@ -148,16 +148,19 @@ async def random_news(ln) -> dict:
 	data = await news_request(ln)
 	if data:
 		shuffle(data)
-		title = text_news_filter(data[0]['title'])
-		description = text_news_filter(data[0]['description'])
-		array = [
-			title,
-			description,
-			data[0]['source']['name'],
-			data[0]['url'],
-			data[0]['urlToImage'],
-		]
-		return array
+		data_array = []
+		for el in data:
+			title = text_news_filter(data[0]['title'])
+			description = text_news_filter(data[0]['description'])
+			data_array_pre = [
+				title,
+				description,
+				el['source']['name'],
+				el['url'],
+				el['urlToImage'],
+			]
+			data_array.append(data_array_pre)
+		return data_array
 
 
 async def text_news_filter(string) -> str:
