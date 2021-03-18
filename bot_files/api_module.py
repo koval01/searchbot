@@ -1,6 +1,6 @@
 import aiohttp, logging, json, string, re
 from random import choice, randint, shuffle
-from config import api_host_search, api_key, cx, admins, news_api_key
+from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words
 
 
 temp_memory_array = []
@@ -167,3 +167,8 @@ async def text_news_filter(string) -> str:
 	"""
 	string = str(string).replace('https://', '').replace('http://', '')
 	return await cleanhtml(string.replace('&raquo;', '').replace('&laquo;', '').replace('&nbsp;', ''))
+
+
+async def check_news_search(string) -> bool:
+	if news_check_words in string:
+		pass

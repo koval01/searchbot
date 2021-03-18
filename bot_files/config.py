@@ -27,5 +27,10 @@ news_api_key = [
     '933c91dd12af485eb98981a59801486e',
     '6990e000cee64ff98aa5f69e57201c44',
 ]
+news_check_words = [
+    'новости', 'новостей', 'новостной', 'новостями', 'новостях', 'новостям',
+    'новини', 'новин', 'новинний', 'новинами', 'новинах', 'новинами',
+    'news', 'newsfeed', 'feed', 'new', 'channel', 'channels', 'tidings', 'update', 'updates', 'report',
+]
 
 user_agent_static = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4442.4 Safari/537.36'

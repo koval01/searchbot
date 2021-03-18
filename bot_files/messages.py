@@ -93,6 +93,11 @@ menu_btns = [
     [support_btns[1], 'Реклама'],
     [support_btns[2], 'Ad'],
 ]
+news_button = [
+    'Новини AWARE',
+    'Новости AWARE',
+    'News AWARE',
+]
 
 async def check_user_msg(string, ln) -> str:
     """
