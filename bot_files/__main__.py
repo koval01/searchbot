@@ -292,7 +292,7 @@ async def handle_message_received_text(message):
 					if nw:
 						nw_button = msg.news_button[ln]
 						buttons = await create_inline_buttons(
-							[nw_button, 'aware_news']
+							[[nw_button, 'aware_news']]
 						)
 						for i in x[1:]:
 							buttons = await append_button_to_inline_dict_buttons(

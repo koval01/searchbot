@@ -1,5 +1,5 @@
-# API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
-API_TOKEN = '1696588778:AAHlQf34MS54HP9QU9O6JIK8Lw-YBuqxs3Y' # deploy
+API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
+# API_TOKEN = '1696588778:AAHlQf34MS54HP9QU9O6JIK8Lw-YBuqxs3Y' # deploy
 
 admins = [
     '542956255',
@@ -28,8 +28,8 @@ news_api_key = [
     '6990e000cee64ff98aa5f69e57201c44',
 ]
 news_check_words = [
-    'новости', 'новостей', 'новостной', 'новостями', 'новостях', 'новостям',
-    'новини', 'новин', 'новинний', 'новинами', 'новинах', 'новинами',
+    'новости', 'новостей', 'новостной', 'новостями', 'новостях', 'новостям', 'новость',
+    'новини', 'новин', 'новинний', 'новинами', 'новинах', 'новинами', 'новина',
     'news', 'newsfeed', 'feed', 'new', 'channel', 'channels', 'tidings', 'update', 'updates', 'report',
 ]
 

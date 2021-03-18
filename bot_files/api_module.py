@@ -170,5 +170,5 @@ async def text_news_filter(string) -> str:
 
 
 async def check_news_search(string) -> bool:
-	if news_check_words in string:
-		return True
+	s = "".join(x for x in string if x.isalpha() or x.isspace())
+	return [True for i in s.lower().split() if i in news_check_words]
