@@ -397,7 +397,7 @@ async def send_admins_msg(type, pseudo, fullname, user_id, text, reply_mk=None) 
 		pseudo = f'@{pseudo}'
 	if type == 'Support':
 		db.add_contact_ticket(pseudo, fullname, user_id, text)
-	if user_id not in config.admins and not reply_mk:
+	if str(user_id) not in config.admins and not reply_mk:
 		buttons = await create_inline_buttons(
 			[['Ban user 🚫', 'ban_action:%s' % user_id]]
 		)
