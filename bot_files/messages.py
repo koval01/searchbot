@@ -98,10 +98,41 @@ news_button = [
     'Новости AWARE',
     'News AWARE',
 ]
+news_error_get = [
+    'Виникла помилка при формуванні стрічки новин.',
+    'Возникла ошибка при формировании ленты новостей.',
+    'There was an error forming the news feed.',
+]
 news_no = [
     'Наразі немає більше новин. Новини оновлюються приблизно раз в добу. Чекаю на тебе завтра.',
     'Пока нет больше новостей. Новости обновляются примерно раз в сутки. Жду тебя завтра.',
     'There is no more news at this time. The news is updated about once a day. I\'m waiting for you tomorrow.',
+]
+news_template = [
+    '<b>%s</b>\n\n%s\n\nДжерело: <a href="%s"><b>%s</b></a>',
+    '<b>%s</b>\n\n%s\n\nИсточник: <a href="%s"><b>%s</b></a>',
+    '<b>%s</b>\n\n%s\n\nSource: <a href="%s"><b>%s</b></a>',
+]
+news_scroll = [
+    'Наступна новина',
+    'Следующая новость',
+    'Next news',
+]
+news_slowly = [
+    'Повільніше будь ласка',
+    'Медленнее пожалуйста',
+    'Slower please',
+]
+no_news_more = [
+    'Можливо виникла помилка, запитайте новини ще раз.',
+    'Возможно возникла ошибка, запросите новости еще раз.',
+    'An error may have occurred, request the news again.',
+]
+ban_user_notify = 'The %s administrator has blocked the user %s'
+already_banned = [
+    'Користувач вже заблокований',
+    'Пользователь уже заблокирован',
+    'User is already blocked',
 ]
 
 async def check_user_msg(string, ln) -> str:

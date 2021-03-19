@@ -13,7 +13,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 
 from api_module import (
 	data_get, data_prepare, cleanhtml, search_and_decode_el,
-	title_cut, check_admin, random_news, check_news_search
+	title_cut, check_admin, random_news, check_news_search,
+	get_news, message_news_prepare
 )
 
 from sqlcontroller import SQLight
@@ -55,6 +56,39 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 		msg.start_message[ln],
 			reply_markup=await menu(callback_query)
 	)
+	await bot.answer_callback_query(callback_query.id)
+
+
+@dp.callback_query_handler(lambda call_back: 'ban_action:' in call_back.data)
+async def process_callback_button1(callback_query: types.CallbackQuery):
+	a_result = await check_admin(callback_query)
+	if a_result:
+		user_id = callback_query.data.replace('ban_action:', '')
+		ln = db.subscriber_get_lang(callback_query.from_user.id)
+		data = db.subscriber_get_from_user_id(user_id)[0]
+		if not data[5]:
+			db.update_ban(user_id)
+			buttons = await create_inline_buttons(
+				[['Unban user ✅', f'unban1_action:{user_id}']]
+			)
+			await bot.send_message(
+				callback_query.from_user.id,
+				'You blocked %s (%s)' % (data[3], user_id),
+				reply_markup=buttons
+			)
+			await send_admins_msg(
+				'Ban',
+				callback_query.from_user.username,
+				callback_query.from_user.full_name,
+				callback_query.from_user.id,
+				'Ban user %s (%s)' % (data[3], user_id),
+				buttons,
+			)
+		else:
+			await bot.send_message(
+				callback_query.from_user.id,
+				msg.already_banned[ln]
+			)
 	await bot.answer_callback_query(callback_query.id)
 
 
@@ -116,32 +150,135 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 async def process_callback_button1(callback_query: types.CallbackQuery):
 	token = int(callback_query.data.replace('aware_news:', ''))
 	ln = db.subscriber_get_lang(callback_query.from_user.id)
-	if not token:
+	no_answer = True
+	if token == 0:
 		try:
-			await dp.throttle('text', rate=7200)
+			await dp.throttle('news', rate=7200)
 		except Throttled:
 			await bot.send_message(
 				callback_query.from_user.id,
 				msg.news_no[ln],
 			)
 		else:
-			news_data = await random_news(ln)
-			global news_array
-			news_array.append(
-				[
-					callback_query.from_user.id,
-					news_data,
-				]
+			await send_admins_msg(
+				'Select',
+				callback_query.from_user.username,
+				callback_query.from_user.full_name,
+				callback_query.from_user.id,
+				msg.news_button[ln],
 			)
-	db.update_lang(
-		callback_query.from_user.id, ln
-	)
-	await bot.send_message(
-		callback_query.from_user.id,
-		msg.start_message[ln],
-			reply_markup=await menu(callback_query)
-	)
-	await bot.answer_callback_query(callback_query.id)
+			news_data = await random_news(ln)
+			if news_data:
+				global news_array
+				news_array.append(
+					[
+						callback_query.from_user.id,
+						news_data,
+					]
+				)
+				feed = await get_news(
+					news_array, token,
+					callback_query.from_user.id
+				)
+				nw_str = await message_news_prepare(
+					feed[0], feed[1], feed[2], feed[3], ln
+				)
+				nw_buttons = await create_inline_buttons(
+					[[msg.news_scroll[ln], 'aware_news:1']]
+				)
+				if feed[4]:
+					try:
+						await bot.send_photo(
+							callback_query.from_user.id,
+							feed[4],
+							nw_str,
+							reply_markup=nw_buttons,
+						)
+					except Exception as e:
+						logging.error(e)
+						await bot.send_message(
+							callback_query.from_user.id,
+							nw_str,
+							reply_markup=nw_buttons,
+							disable_web_page_preview=True,
+						)
+				else:
+					await bot.send_message(
+						callback_query.from_user.id,
+						nw_str,
+						reply_markup=nw_buttons,
+						disable_web_page_preview=True,
+					)
+			else:
+				await bot.send_message(
+					callback_query.from_user.id,
+					msg.news_error_get[ln],
+				)
+	else:
+		try:
+			await dp.throttle('news_get', rate=1.5)
+		except Throttled:
+			await bot.answer_callback_query(
+				callback_query.id,
+				msg.news_slowly[ln],
+			)
+			no_answer = False
+		else:
+			feed = await get_news(
+				news_array, token,
+				callback_query.from_user.id
+			)
+			if feed:
+				test_feed = await get_news(
+					news_array, token + 1,
+					callback_query.from_user.id
+				)
+				nw_str = await message_news_prepare(
+					feed[0], feed[1], feed[2], feed[3], ln
+				)
+				if test_feed:
+					nw_buttons = await create_inline_buttons(
+						[[msg.news_scroll[ln], 'aware_news:%s' % str(token + 1)]]
+					)
+				else:
+					nw_buttons = None
+					await send_admins_msg(
+						'Actions',
+						callback_query.from_user.username,
+						callback_query.from_user.full_name,
+						callback_query.from_user.id,
+						'Looked at everything news',
+					)
+				if feed[4]:
+					try:
+						await bot.send_photo(
+							callback_query.from_user.id,
+							feed[4],
+							nw_str,
+							reply_markup=nw_buttons,
+						)
+					except Exception as e:
+						logging.error(e)
+						await bot.send_message(
+							callback_query.from_user.id,
+							nw_str,
+							reply_markup=nw_buttons,
+							disable_web_page_preview=True,
+						)
+				else:
+					await bot.send_message(
+						callback_query.from_user.id,
+						nw_str,
+						reply_markup=nw_buttons,
+						disable_web_page_preview=True,
+					)
+			else:
+				await bot.send_message(
+					callback_query.from_user.id,
+					msg.no_news_more[ln],
+				)
+	if no_answer:
+		await bot.answer_callback_query(callback_query.id)
 
 
 async def get_button_name(data, buttons) -> str:
@@ -212,11 +349,11 @@ async def subscribe(message: types.Message):
 
 
 @dp.message_handler(commands=['lang'])
-async def subscribe(message: types.Message):
+async def lang(message: types.Message):
 	await lang_select(message)
 
 
-async def send_admins_msg(type, pseudo, fullname, user_id, text) -> None:
+async def send_admins_msg(type, pseudo, fullname, user_id, text, reply_mk=None) -> None:
 	"""
 	Функція, що надсилає повідомлення адміністраторам
 	:param type: Тип повідомлення
@@ -226,27 +363,30 @@ async def send_admins_msg(type, pseudo, fullname, user_id, text) -> None:
 	:param text: Текст повідомлення
 	:return: None
 	"""
-	button = ''
 	if not pseudo:
-		pseudo = 'Немає псевдоніму'
+		pseudo = 'No found username'
 	else:
 		pseudo = f'@{pseudo}'
 	if type == 'Support':
 		db.add_contact_ticket(pseudo, fullname, user_id, text)
-		# request_id = db.add_contact_ticket(pseudo, fullname, user_id, text)[0][0]
-		# button = await create_inline_buttons(['Не розглянуто', 'admin_ticket:%s' % request_id])
+	if user_id not in config.admins and not reply_mk:
+		buttons = await create_inline_buttons(
+			[['Ban user 🚫', 'ban_action:%s' % user_id]]
+		)
+	elif reply_mk:
+		buttons = reply_mk
+	else:
+		buttons = None
 	for i in config.admins:
 		if int(i) != int(user_id):
-			if button:
-				pass
-			else:
-				try:
-					await bot.send_message(
-						chat_id=i,
-						text='[%s] %s (%s) "%s"' % (type, fullname, pseudo, text),
-					)
-				except Exception as e:
-					logging.error(e)
+			try:
+				await bot.send_message(
+					chat_id=i,
+					text='[%s] %s (%s) "%s"' % (type, fullname, pseudo, text),
+					reply_markup=buttons,
+				)
+			except Exception as e:
+				logging.error(e)
 
 
 @dp.message_handler(state=AdminStates.contact_admin)

@@ -1,4 +1,5 @@
 import aiohttp, logging, json, string, re
+import messages as msg
 from random import choice, randint, shuffle
 from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words
 
@@ -136,7 +137,8 @@ async def news_request(ln) -> dict:
 			"category": 'general',
 		}) as response:
 			if response.status == 200 and await response.text():
-				return json.loads(await response.text()['articles'])
+				data = await response.text()
+				return json.loads(data)['articles']
 
 
 async def random_news(ln) -> dict:
@@ -150,8 +152,8 @@ async def random_news(ln) -> dict:
 		shuffle(data)
 		data_array = []
 		for el in data:
-			title = text_news_filter(data[0]['title'])
-			description = text_news_filter(data[0]['description'])
+			title = await text_news_filter(el['title'])
+			description = await text_news_filter(el['description'])
 			data_array_pre = [
 				title,
 				description,
@@ -163,6 +165,36 @@ async def random_news(ln) -> dict:
 		return data_array
 
 
+async def get_news(array, id_el, id_user) -> dict:
+	"""
+	Видача елемента за ідентифікатором елемента та користувача
+	:param array: Загальний масив
+	:param id_el: Ідентифікатор елемента
+	:param id_user: Ідентифікатор користувача
+	:return:
+	"""
+	for i in array:
+		if i[0] == id_user:
+			try:
+				return i[1][id_el]
+			except Exception as e:
+				logging.error(e)
+				return False
+
+
+async def message_news_prepare(title, text, source_name, url, ln) -> str:
+	"""
+	Підготовка повідомлення з новиною
+	:param title: Заголовок
+	:param text: Текст
+	:param source_name: Назва джерела
+	:param url: Посилання на джерело
+	:param ln: Мова
+	:return: Строка готового повідомлення
+	"""
+	return msg.news_template[ln] % (title, text, url, source_name)
+
+
 async def text_news_filter(string) -> str:
 	"""
 	Функція для підготовки тексту новини
@@ -170,7 +202,9 @@ async def text_news_filter(string) -> str:
 	:return: Оброблена строка
 	"""
 	string = str(string).replace('https://', '').replace('http://', '')
-	return await cleanhtml(string.replace('&raquo;', '').replace('&laquo;', '').replace('&nbsp;', ''))
+	result = string.replace('&raquo;', '').replace('&laquo;', '').replace('&nbsp;', '')
+	x = await cleanhtml(result)
+	return x
 
 
 async def check_news_search(string) -> bool:

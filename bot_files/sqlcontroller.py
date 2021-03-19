@@ -67,9 +67,19 @@ class SQLight:
         Оновлення мови визначенного користувача
         :return: None
         """
-        # 0 UA; 1 RU; 2 EN
+        # 0 UA; 1 RU; 2 EN;
         with self.connection:
             return self.cursor.execute("UPDATE `subscriptions` SET `lang` = ? WHERE `user_id` = ?", (lang, user_id))
+
+
+    def update_ban(self, user_id, ban=1) -> None:
+        """
+        Оновлення статусу бану користувача
+        :return: None
+        """
+        # 0 unban; 1 ban;
+        with self.connection:
+            return self.cursor.execute("UPDATE `subscriptions` SET `ban` = ? WHERE `user_id` = ?", (ban, user_id))
 
 
     def subscriber_get_lang(self, user_id) -> dict:
