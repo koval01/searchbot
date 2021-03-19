@@ -134,6 +134,11 @@ already_banned = [
     'Пользователь уже заблокирован',
     'User is already blocked',
 ]
+already_unbanned = [
+    'Схоже цей користувач вже розблокований',
+    'Похоже этот пользователь уже разблокирован',
+    'It looks like this user is already unlocked',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

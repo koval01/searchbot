@@ -92,6 +92,34 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 	await bot.answer_callback_query(callback_query.id)
 
 
+@dp.callback_query_handler(lambda call_back: 'unban1_action:' in call_back.data)
+async def process_callback_button1(callback_query: types.CallbackQuery):
+	a_result = await check_admin(callback_query)
+	if a_result:
+		user_id = callback_query.data.replace('unban1_action:', '')
+		ln = db.subscriber_get_lang(callback_query.from_user.id)
+		data = db.subscriber_get_from_user_id(user_id)[0]
+		if data[5]:
+			db.update_ban(user_id, 0)
+			await bot.send_message(
+				callback_query.from_user.id,
+				'You unblocked %s (%s)' % (data[3], user_id),
+			)
+			await send_admins_msg(
+				'Ban',
+				callback_query.from_user.username,
+				callback_query.from_user.full_name,
+				callback_query.from_user.id,
+				'Unban user %s (%s)' % (data[3], user_id),
+			)
+		else:
+			await bot.send_message(
+				callback_query.from_user.id,
+				msg.already_unbanned[ln]
+			)
+	await bot.answer_callback_query(callback_query.id)
+
+
 @dp.callback_query_handler(lambda call_back: 'inline_data:' in call_back.data)
 async def process_callback_button1(callback_query: types.CallbackQuery):
 	ln = db.subscriber_get_lang(callback_query.from_user.id)
