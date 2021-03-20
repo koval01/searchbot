@@ -2,8 +2,10 @@ DEBUG = True
 
 if DEBUG:
     API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
+    db_root = "db.db"
 else:
     API_TOKEN = '1696588778:AAHlQf34MS54HP9QU9O6JIK8Lw-YBuqxs3Y' # deploy
+    db_root = "./awarebot/db.db"
 
 admins = [
     '542956255',

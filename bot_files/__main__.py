@@ -35,7 +35,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, loop=loop, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 
-db_path = os.path.abspath("db.db")
+db_path = os.path.abspath(config.db_root)
 db = SQLight(db_path)
 
 news_array = []
