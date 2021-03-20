@@ -270,9 +270,9 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 					callback_query.from_user.id,
 					msg.news_error_get[ln],
 				)
-	else:
+	elif token != 9999:
 		try:
-			await dp.throttle('news_get', rate=1.5)
+			await dp.throttle('news_get', rate=1)
 		except Throttled:
 			await bot.answer_callback_query(
 				callback_query.id,
@@ -297,7 +297,9 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						[[msg.news_scroll[ln], 'aware_news:%s' % str(token + 1)]]
 					)
 				else:
-					nw_buttons = None
+					nw_buttons = await create_inline_buttons(
+						[[msg.news_view_finish_button[ln], 'aware_news:9999']]
+					)
 					await send_admins_msg(
 						'Actions',
 						callback_query.from_user.username,
@@ -342,6 +344,27 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 					callback_query.from_user.id,
 					msg.no_news_more[ln],
 				)
+	else:
+		d_news = await get_last_news_id(callback_query.from_user.id)
+		try:
+			await bot.delete_message(
+				callback_query.from_user.id,
+				d_news,
+			)
+		except Exception as e:
+			logging.error(e)
+		try:
+			await bot.send_photo(
+				callback_query.from_user.id,
+				config.news_finish_background,
+				msg.news_view_finish_notify[ln],
+			)
+		except Exception as e:
+			await bot.send_message(
+				callback_query.from_user.id,
+				msg.news_view_finish_notify[ln],
+			)
+			logging.error(e)
 	if no_answer:
 		await bot.answer_callback_query(callback_query.id)
 

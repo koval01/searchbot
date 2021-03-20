@@ -104,9 +104,9 @@ news_error_get = [
     'There was an error forming the news feed.',
 ]
 news_no = [
-    'Наразі немає більше новин. Новини оновлюються приблизно раз в добу. Чекаю на тебе завтра.',
-    'Пока нет больше новостей. Новости обновляются примерно раз в сутки. Жду тебя завтра.',
-    'There is no more news at this time. The news is updated about once a day. I\'m waiting for you tomorrow.',
+    'Пробач, але стрічку новин не можна оновлювати частіше ніж раз в дві години. Це зроблено для запогіння флуду. Якщо Ви відправите запит раніше, то таймер скинеться.',
+    'Извините, но новостная лента не может обновляться чаще одного раза в два часа. Это сделано, чтобы предотвратить флуд. Если Вы отправите запрос раньше, то таймер сбросится.',
+    'Sorry, but the news feed cannot be updated more than once every two hours. This is done to prevent flooding. If you send a request earlier, the timer will reset.',
 ]
 news_template = [
     '<b>%s</b>\n\n%s\n\nДжерело: <a href="%s"><b>%s</b></a>',
