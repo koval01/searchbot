@@ -1,4 +1,4 @@
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
