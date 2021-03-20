@@ -1,5 +1,9 @@
-API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
-# API_TOKEN = '1696588778:AAHlQf34MS54HP9QU9O6JIK8Lw-YBuqxs3Y' # deploy
+DEBUG = True
+
+if DEBUG:
+    API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
+else:
+    API_TOKEN = '1696588778:AAHlQf34MS54HP9QU9O6JIK8Lw-YBuqxs3Y' # deploy
 
 admins = [
     '542956255',
@@ -37,4 +41,4 @@ news_check_words = [
 news_default_background = 'https://i.ibb.co/3ym6y6g/news-default-background.png'
 news_finish_background = 'https://i.ibb.co/hmZPB4P/news-finish.png'
 
-user_agent_static = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4442.4 Safari/537.36'
+user_agent_static = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4449.6 Safari/537.36'
