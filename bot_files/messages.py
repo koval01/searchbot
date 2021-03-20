@@ -139,6 +139,16 @@ already_unbanned = [
     'Похоже этот пользователь уже разблокирован',
     'It looks like this user is already unlocked',
 ]
+news_view_finish_notify = [
+    'Ви переглянули всі новини на сьогодні. Буду радий бачити Вас завтра 😉',
+    'Вы просмотрели все новости на сегодня. Буду рад видеть Вас завтра 😉',
+    'You have viewed all the news for today. I will be glad to see you tomorrow 😉',
+]
+news_view_finish_button = [
+    'Гаразд, дякую',
+    'Ладно, спасибо',
+    'Okay, thanks',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

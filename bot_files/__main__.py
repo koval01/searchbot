@@ -39,6 +39,7 @@ db_path = os.path.abspath("db.db")
 db = SQLight(db_path)
 
 news_array = []
+last_news_msg_get = []
 
 class AdminStates(StatesGroup):
 	contact_admin = State()
@@ -179,9 +180,32 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 	token = int(callback_query.data.replace('aware_news:', ''))
 	ln = db.subscriber_get_lang(callback_query.from_user.id)
 	no_answer = True
+
+	async def local_news_id_update(user_id, msg_) -> None:
+		global last_news_msg_get
+		msg_ = msg_.message_id
+		add = False
+		for i in last_news_msg_get:
+			if i[0] == user_id:
+				i[1] = msg_
+				add = True
+		if not add:
+			last_news_msg_get.append(
+				[
+					user_id,
+					msg_,
+				]
+			)
+
+	async def get_last_news_id(user_id) -> int:
+		global last_news_msg_get
+		for i in last_news_msg_get:
+			if i[0] == user_id:
+				return i[1]
+
 	if token == 0:
 		try:
-			await dp.throttle('news', rate=5)
+			await dp.throttle('news', rate=7200)
 		except Throttled:
 			await bot.send_message(
 				callback_query.from_user.id,
@@ -219,7 +243,7 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 				)
 				if feed[4]:
 					try:
-						await bot.send_photo(
+						n_msg = await bot.send_photo(
 							callback_query.from_user.id,
 							feed[4],
 							nw_str,
@@ -227,19 +251,20 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						)
 					except Exception as e:
 						logging.error(e)
-						await bot.send_message(
+						n_msg = await bot.send_message(
 							callback_query.from_user.id,
 							nw_str,
 							reply_markup=nw_buttons,
 							disable_web_page_preview=True,
 						)
 				else:
-					await bot.send_message(
+					n_msg = await bot.send_message(
 						callback_query.from_user.id,
 						nw_str,
 						reply_markup=nw_buttons,
 						disable_web_page_preview=True,
 					)
+				await local_news_id_update(callback_query.from_user.id, n_msg)
 			else:
 				await bot.send_message(
 					callback_query.from_user.id,
@@ -280,9 +305,17 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						callback_query.from_user.id,
 						'Looked at everything news',
 					)
+				d_news = await get_last_news_id(callback_query.from_user.id)
+				try:
+					await bot.delete_message(
+						callback_query.from_user.id,
+						d_news,
+					)
+				except Exception as e:
+					logging.error(e)
 				if feed[4]:
 					try:
-						await bot.send_photo(
+						n_msg = await bot.send_photo(
 							callback_query.from_user.id,
 							feed[4],
 							nw_str,
@@ -290,19 +323,20 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						)
 					except Exception as e:
 						logging.error(e)
-						await bot.send_message(
+						n_msg = await bot.send_message(
 							callback_query.from_user.id,
 							nw_str,
 							reply_markup=nw_buttons,
 							disable_web_page_preview=True,
 						)
 				else:
-					await bot.send_message(
+					n_msg = await bot.send_message(
 						callback_query.from_user.id,
 						nw_str,
 						reply_markup=nw_buttons,
 						disable_web_page_preview=True,
 					)
+				await local_news_id_update(callback_query.from_user.id, n_msg)
 			else:
 				await bot.send_message(
 					callback_query.from_user.id,
