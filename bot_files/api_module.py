@@ -1,7 +1,7 @@
 import aiohttp, logging, json, string, re
 import messages as msg
 from random import choice, randint, shuffle
-from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words
+from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words, weather_api_key
 
 
 temp_memory_array = []
@@ -139,6 +139,25 @@ async def news_request(ln) -> dict:
 			if response.status == 200 and await response.text():
 				data = await response.text()
 				return json.loads(data)['articles']
+
+
+async def weather_request(lat, lon) -> dict:
+	"""
+	Функція запиту до News API
+	:param ln: Мовний код
+	:return: dict news
+	"""
+	url = 'https://api.openweathermap.org/data/2.5/weather'
+	shuffle(weather_api_key)
+	for i, e in enumerate(news_api_key):
+		async with aiohttp.request('GET', url, params={
+			"appid": weather_api_key[i],
+			"lat": lat,
+			"lon": lon,
+		}) as response:
+			if response.status == 200 and await response.text():
+				data = await response.text()
+				return json.loads(data)
 
 
 async def random_news(ln) -> dict:
