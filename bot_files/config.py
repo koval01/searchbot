@@ -1,48 +1,21 @@
-DEBUG = False
+import os
+
+DEBUG = True
 
 if DEBUG:
-    API_TOKEN = '1642194863:AAGSRDOz1cS3MLMGs9XHAy9h8Leivm5Ltvc' # dev
+    API_TOKEN = os.environ['DEV_TOKEN']
     db_root = "db.db"
 else:
-    API_TOKEN = '1696588778:AAHlQf34MS54HP9QU9O6JIK8Lw-YBuqxs3Y' # deploy
+    API_TOKEN = os.environ['DEPLOY_TOKEN']
     db_root = "./awarebot/db.db"
 
-admins = [
-    '542956255',
-    '652933710',
-]
-
-format_logging = u'%(filename)+18s [ LINE:%(lineno)-5s] %(levelname)-8s [%(asctime)s] %(message)s'
-
-api_host_search = 'https://falling-darkness-0b7f.darkstream.workers.dev/'
-
-api_key = [
-    'AIzaSyB_ms4tPwmiFl9g37IVWoXJxUvKn1Yn3rM',
-    'AIzaSyCTHkOgSOl_l6lgWM-qihAG5S3fowB10Ic',
-    'AIzaSyDv-kQ__Id9uq0zdk9em5KL5jTASA7t8RQ',
-    'AIzaSyDMjeAF2l5-ENbqexMSFuLj1itddYBWAF4',
-    'AIzaSyChdbNTHGloGgY3JWioyETE9rMJGR0_cVA',
-    'AIzaSyB1YEgIzKT_Dp_ZNYDpLWrdgVSevzHXfPc',
-    'AIzaSyCerdNSBWn_1mLthc30-kgETUW21v0ilqs',
-    'AIzaSyB3oqKTJCTLKlqEEobkGd5JUMnb_RNYWhc',
-    'AIzaSyB5i8FBvyWjPVvjF9RZLIc_lVi1arfdCP0',
-]
-cx = '6eeb925d66ac99896'
-news_api_key = [
-    'a96688b700f041999a06916d7d52ef1b',
-    '933c91dd12af485eb98981a59801486e',
-    '6990e000cee64ff98aa5f69e57201c44',
-    '9218a9947dd044fa8bcaa1cc7b833490',
-    '4cd80ad3f64e476fab228700fdb0961b',
-]
-news_check_words = [
-    'новости', 'новостей', 'новостной', 'новостная', 'новостное', 'новостями', 'новостях', 'новостям', 'новость', 'нового', 'новенького',
-    'новини', 'новин', 'новинний', 'новинами', 'новинах', 'новинами', 'новина',
-    'news', 'newsfeed', 'feed', 'new', 'channel', 'channels', 'tidings', 'update', 'updates', 'report',
-    'технологии', 'бизнес', 'наука', 'робот', 'роботы', 'акции', 'технология', 'развитие', 'валюта', 'рубль',
-    'биткоин', 'біткоїн', 'компьютеры', 'компьютер', 'процессор', 'процессоры', 'развитие', 'экономика',
-]
-news_default_background = 'https://i.ibb.co/3ym6y6g/news-default-background.png'
-news_finish_background = 'https://i.ibb.co/hmZPB4P/news-finish.png'
-
-user_agent_static = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4449.6 Safari/537.36'
+admins = os.environ['ADMINS'].split()
+format_logging = u'%s' % os.environ['LOGGING_CONFIG']
+api_host_search = os.environ['SEARCH_API_HOST']
+cx = os.environ['CX']
+api_key = os.environ['SEARCH_API_KEYS'].split()
+news_api_key = os.environ['NEWS_API_KEYS'].split()
+news_check_words = os.environ['NEWS_CHECK_WORDS'].split()
+news_default_background = os.environ['NEWS_DEF_BACK']
+news_finish_background = os.environ['NEWS_FINISH_BACK']
+user_agent_static = os.environ['USER_AGENT']

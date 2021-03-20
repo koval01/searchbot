@@ -582,5 +582,15 @@ async def handle_message_received_text(message):
 				await message.reply(msg.long_msg[ln],  reply_markup=await menu(message))
 
 
+@dp.message_handler(content_types=['location'])
+async def handle_message_received_text(message):
+	print(message.location)
+
+
+async def shutdown(dispatcher: Dispatcher):
+	await dispatcher.storage.close()
+	await dispatcher.storage.wait_closed()
+
+
 if __name__ == '__main__':
-	executor.start_polling(dp, skip_updates=False)
+	executor.start_polling(dp, loop=loop, skip_updates=False, on_shutdown=shutdown)
