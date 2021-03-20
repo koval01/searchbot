@@ -149,6 +149,26 @@ news_view_finish_button = [
     'Ладно, спасибо',
     'Okay, thanks',
 ]
+weather_feel_temp = [
+    'Відчувається, як',
+    'Чувствуется, как',
+    'Feels like',
+]
+weather_pressure = [
+    'Тиск',
+    'Давление',
+    'Pressure',
+]
+weather_pressure_m = [
+    'гПа',
+    'гПа',
+    'hPa',
+]
+weather_humidity = [
+    'Вологість',
+    'Влажность',
+    'Humidity',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

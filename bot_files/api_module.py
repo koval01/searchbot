@@ -141,24 +141,53 @@ async def news_request(ln) -> dict:
 				return json.loads(data)['articles']
 
 
-async def weather_request(lat, lon) -> dict:
+async def weather_request(lat, lon, ln) -> dict:
 	"""
-	Функція запиту до News API
-	:param ln: Мовний код
-	:return: dict news
+	Функція запиту до OpenWeatherMap API
+	:param lat: Широта
+	:param lon: Довгота
+	:return: dict weather data
 	"""
 	url = 'https://api.openweathermap.org/data/2.5/weather'
+	l = ['ua', 'ru', 'en']
 	shuffle(weather_api_key)
 	for i, e in enumerate(news_api_key):
 		async with aiohttp.request('GET', url, params={
 			"appid": weather_api_key[i],
 			"lat": lat,
 			"lon": lon,
+			"units": "metric",
+			"lang": l[ln]
 		}) as response:
 			if response.status == 200 and await response.text():
 				data = await response.text()
 				return json.loads(data)
 
+
+async def weather(lat, lon, ln=1) -> str:
+	"""
+	Отримуємо опрацьовані данні про погоду
+	:param lat: Довгота
+	:param lon: Широта
+	:param ln: Мова
+	:return: готова стрічка з даними
+	"""
+	data = await weather_request(lat, lon, ln)
+	if data['cod'] == 200:
+		result = dict(
+			name=data['name'],
+			country=data['sys']['country'],
+			sunrise=data['sys']['sunrise'],
+			sunset=data['sys']['sunset'],
+			timezone=data['timezone'],
+			temp=round(data['main']['temp']),
+			feels_like_temp=round(data['main']['feels_like']),
+			pressure=data['main']['pressure'],
+			humidity=data['main']['humidity'],
+			description=data['weather'][0]['description'],
+			icon=data['weather'][0]['icon'],
+		)
+		return result
 
 async def random_news(ln) -> dict:
 	"""

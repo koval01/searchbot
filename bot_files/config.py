@@ -4,10 +4,10 @@ DEBUG = True
 
 if DEBUG:
     API_TOKEN = os.environ['DEV_TOKEN']
-    db_root = "db.db"
+    bot_root = "."
 else:
     API_TOKEN = os.environ['DEPLOY_TOKEN']
-    db_root = "./awarebot/db.db"
+    bot_root = "./awarebot"
 
 admins = os.environ['ADMINS'].split()
 format_logging = u'%s' % os.environ['LOGGING_CONFIG']

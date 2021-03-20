@@ -14,8 +14,10 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from api_module import (
 	data_get, data_prepare, cleanhtml, search_and_decode_el,
 	title_cut, check_admin, random_news, check_news_search,
-	get_news, message_news_prepare
+	get_news, message_news_prepare, weather
 )
+
+from weather_image import generator_weather_image
 
 from sqlcontroller import SQLight
 
@@ -35,7 +37,7 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, loop=loop, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 
-db_path = os.path.abspath(config.db_root)
+db_path = os.path.abspath("%s/db.db" % config.bot_root)
 db = SQLight(db_path)
 
 news_array = []
@@ -584,7 +586,12 @@ async def handle_message_received_text(message):
 
 @dp.message_handler(content_types=['location'])
 async def handle_message_received_text(message):
-	print(message.location)
+	ln = db.subscriber_get_lang(message.from_user.id)
+	w = await weather(message.location.latitude, message.location.longitude, ln)
+	x = await generator_weather_image(w, ln)
+	await message.reply_photo(open(x, 'rb'))
+	from os import remove
+	remove(x)
 
 
 async def shutdown(dispatcher: Dispatcher):
