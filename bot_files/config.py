@@ -34,5 +34,6 @@ news_check_words = [
     'технологии', 'бизнес', 'наука', 'робот', 'роботы', 'акции', 'технология', 'развитие', 'валюта', 'рубль',
     'биткоин', 'біткоїн', 'компьютеры', 'компьютер', 'процессор', 'процессоры', 'развитие', 'экономика',
 ]
+news_default_background = 'https://i.ibb.co/3ym6y6g/news-default-background.png'
 
 user_agent_static = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4442.4 Safari/537.36'
