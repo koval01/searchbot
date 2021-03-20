@@ -181,7 +181,7 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 	no_answer = True
 	if token == 0:
 		try:
-			await dp.throttle('news', rate=7200)
+			await dp.throttle('news', rate=5)
 		except Throttled:
 			await bot.send_message(
 				callback_query.from_user.id,
@@ -198,6 +198,9 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 			news_data = await random_news(ln)
 			if news_data:
 				global news_array
+				for x, i in enumerate(news_array):
+					if i[0] == callback_query.from_user.id:
+						news_array.pop(x)
 				news_array.append(
 					[
 						callback_query.from_user.id,
