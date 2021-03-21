@@ -358,7 +358,7 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 		try:
 			await bot.send_photo(
 				callback_query.from_user.id,
-				config.news_finish_background,
+				open(config.news_finish_background, 'rb'),
 				msg.news_view_finish_notify[ln],
 			)
 		except Exception as e:
