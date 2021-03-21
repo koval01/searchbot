@@ -169,6 +169,16 @@ weather_humidity = [
     'Влажность',
     'Humidity',
 ]
+weather_temp = [
+    'Температура',
+    'Температура',
+    'Temperature',
+]
+weather_wind = [
+    'Вітер',
+    'Ветер',
+    'Wind',
+]
 
 async def check_user_msg(string, ln) -> str:
     """
