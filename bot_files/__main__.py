@@ -327,15 +327,17 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						)
 					except Exception as e:
 						logging.error(e)
-						n_msg = await bot.send_message(
+						n_msg = await bot.send_photo(
 							callback_query.from_user.id,
+							open(config.news_default_background, 'rb'),
 							nw_str,
 							reply_markup=nw_buttons,
 							disable_web_page_preview=True,
 						)
 				else:
-					n_msg = await bot.send_message(
+					n_msg = await bot.send_photo(
 						callback_query.from_user.id,
+						open(config.news_default_background, 'rb'),
 						nw_str,
 						reply_markup=nw_buttons,
 						disable_web_page_preview=True,
