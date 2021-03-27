@@ -44,6 +44,19 @@ class SQLight:
             return result
 
 
+    def update_custom_field(self, user_id, field, data, two=False) -> None:
+        """
+        Оновлення кастомного значення
+        :return: None
+        """
+        with self.connection:
+            if not two:
+                prepare_string = "UPDATE `subscriptions` SET `%s` = ? WHERE `user_id` = ?" % field
+            else:
+                prepare_string = "UPDATE `subscriptions` SET `%s` = `%s` + ? WHERE `user_id` = ?" % (field, field)
+            return self.cursor.execute(prepare_string, (data, user_id))
+
+
     def add_subscriber(self, user_id, realname, status = True) -> None:
         """
         Додавання новго користувача

@@ -1,6 +1,7 @@
 import aiohttp, logging, json, string, re
 import messages as msg
 from random import choice, randint, shuffle
+from datetime import datetime
 from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words, weather_api_key
 
 
@@ -119,6 +120,35 @@ async def check_admin(message) -> bool:
 	"""
 	if str(message.from_user.id) in admins:
 		return True
+
+
+async def check_limit(message, db) -> bool:
+	"""
+	Функція для перевірки вичерпання ліміту пошуків користувача
+	:param message: Тіло повідомлення
+	:param db: Клас виклику методів SQL Контролера
+	:return: bool result
+	"""
+	u = message.from_user.id
+	up = db.update_custom_field
+	d = db.subscriber_get_from_user_id(u)[0]
+	day = datetime.today().day
+	prem = d[9]
+	dt = d[7]
+	limit = d[8]
+	default_max = 50
+
+	if dt == day:
+		if not prem and limit >= default_max:
+			return False
+		elif limit >= default_max+prem:
+			return False
+		else:
+			up(u, 'limit_num', 1, 1)
+	else:
+		up(u, 'limit_day', day)
+		up(u, 'limit_num', 0)
+	return True
 
 
 async def news_request(ln) -> dict:

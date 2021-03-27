@@ -179,6 +179,16 @@ weather_wind = [
     'Ветер',
     'Wind',
 ]
+limit_search_msg = [
+    'Пробач, але на сьогодні твоя квота на пошуки вичерпана. (/limit)',
+    'Прости, но на сегодня твоя квота на поиски исчерпана. (/limit)',
+    'I\'m sorry, but your quota for searches has been exhausted. (/limit)',
+]
+limit_menu_msg = [
+    'Привіт, ти маєш 50 безкоштовних пошуків, та %s бонусних. За сьогодні використано %s. Отже до вичерпання квоти на сьогодні, залишилося %s пошуків.',
+    'Привет, ты имеешь 50 бесплатных поисков, и %s бонусных. За сегодня использовано %s. К исчерпанию квоты на сегодня осталось %s поисков.',
+    'Hi, you have 50 free searches and %s bonuses. %s used today. So until the quota is exhausted today, there are %s searches left.',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

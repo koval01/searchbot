@@ -14,7 +14,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from api_module import (
 	data_get, data_prepare, cleanhtml, search_and_decode_el,
 	title_cut, check_admin, random_news, check_news_search,
-	get_news, message_news_prepare, weather
+	get_news, message_news_prepare, weather, check_limit
 )
 
 from weather_image import generator_weather_image
@@ -402,6 +402,24 @@ async def lang_select(message) -> None:
 	)
 
 
+async def limit_info(message) -> None:
+	"""
+	Повідомленя для команди /limit
+	:param message: Тіло отриманого повідомлення від користувача
+	:return: None
+	"""
+	u = message.from_user.id
+	ln = db.subscriber_get_lang(u)
+	d = db.subscriber_get_from_user_id(u)[0]
+	prem = d[9]
+	limit = d[8]
+	default_max = 50
+	exc = (default_max + prem) - limit
+	await bot.send_message(
+		u, msg.limit_menu_msg[ln] % (prem, limit, exc)
+	)
+
+
 async def menu(message) -> dict:
 	"""
 	Функція, що повертає персоналізоване меню
@@ -445,6 +463,11 @@ async def subscribe(message: types.Message):
 @dp.message_handler(commands=['lang'])
 async def lang(message: types.Message):
 	await lang_select(message)
+
+
+@dp.message_handler(commands=['limit'])
+async def lang(message: types.Message):
+	await limit_info(message)
 
 
 async def send_admins_msg(type, pseudo, fullname, user_id, text, reply_mk=None) -> None:
@@ -549,41 +572,45 @@ async def handle_message_received_text(message):
 				await message.reply(msg.admin_ad_help[ln], reply_markup=await cancel_menu(message))
 				await AdminStates.admin_ad_menu.set()
 			elif not message.is_command() and len(message.text) < 2000:
-				await bot.send_chat_action(message.from_user.id, 'typing')
-				text = message.text.replace('@', '').replace('#', '')
-				x = await data_get(text)
-				x = await data_prepare(x)
-				if x:
-					template_items = x[0]
-					title = await cleanhtml(message.text)
-					title = await title_cut(title)
-					nw = await check_news_search(message.text)
-					if nw:
-						nw_button = msg.news_button[ln]
-						buttons = await create_inline_buttons(
-							[[nw_button, 'aware_news:0']]
-						)
-						for i in x[1:]:
-							buttons = await append_button_to_inline_dict_buttons(
-								buttons, i
+				cl = await check_limit(message, db)
+				if cl:
+					await bot.send_chat_action(message.from_user.id, 'typing')
+					text = message.text.replace('@', '').replace('#', '')
+					x = await data_get(text)
+					x = await data_prepare(x)
+					if x:
+						template_items = x[0]
+						title = await cleanhtml(message.text)
+						title = await title_cut(title)
+						nw = await check_news_search(message.text)
+						if nw:
+							nw_button = msg.news_button[ln]
+							buttons = await create_inline_buttons(
+								[[nw_button, 'aware_news:0']]
 							)
+							for i in x[1:]:
+								buttons = await append_button_to_inline_dict_buttons(
+									buttons, i
+								)
+						else:
+							buttons = await create_inline_buttons(x[1:])
+						await message.reply(msg.search_done_msg[ln] % (
+							title,
+							template_items['TotalResults'],
+							len(x) - 1,
+							template_items['SearchTime'],
+						), reply_markup=buttons)
+						await send_admins_msg(
+							'Search',
+							message.from_user.username,
+							message.from_user.full_name,
+							message.from_user.id,
+							title,
+						)
 					else:
-						buttons = await create_inline_buttons(x[1:])
-					await message.reply(msg.search_done_msg[ln] % (
-						title,
-						template_items['TotalResults'],
-						len(x) - 1,
-						template_items['SearchTime'],
-					), reply_markup=buttons)
-					await send_admins_msg(
-						'Search',
-						message.from_user.username,
-						message.from_user.full_name,
-						message.from_user.id,
-						title,
-					)
+						await message.reply(msg.unknown_error[ln], reply_markup=await menu(message))
 				else:
-					await message.reply(msg.unknown_error[ln],  reply_markup=await menu(message))
+					await message.reply(msg.limit_search_msg[ln], reply_markup=await menu(message))
 			else:
 				await message.reply(msg.long_msg[ln],  reply_markup=await menu(message))
 
