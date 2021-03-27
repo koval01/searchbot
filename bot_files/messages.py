@@ -195,9 +195,9 @@ pay_info = [
     'Okay, after payment you will be redirected to the page t.me/%s/?start=XXXXXXXXXXX, after that you will need to go to the chat with the bot through this page. The start parameter contains the code of your paid order, you can use this link as a gift, so do not give it to anyone until you use it.',
 ]
 pay_check = [
-    'Сума: %s\nБонус: %s',
-    'Сумма: %s\nБонус: %s',
-    'Sum: %s\nBonus: %s',
+    'Сума: %s\nБонус: %s\n\nНе забудь зберегти чек, він потрібен на випадок невдалої автоматичної перевірки платежу.',
+    'Сумма: %s\nБонус: %s\n\nНе забудь сохранить чек, он нужен на случай неудачной автоматической проверки платежа.',
+    'Sum: %s\nBonus: %s\n\nDo not forget to save the check, it is needed in case of failure of automatic verification of payment.',
 ]
 
 async def check_user_msg(string, ln) -> str:

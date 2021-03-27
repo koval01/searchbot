@@ -6,7 +6,10 @@ from config import qiwi_api_key
 async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
     """
     Запит до QIWI для стоврення платежу
-    :param question: Текст запитання
+    :param amount: Сума платежу в рублях
+    :param comment: Коментар платежу (ідентифікатор)
+    :param bot_pseudo: Псевдонім бота для генерації посилання
+    :param token: Ідентифікатор платежу для його перевірки
     :return: JSON відповідь переведена в словник
     """
     SC = 'https'
