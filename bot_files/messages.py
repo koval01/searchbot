@@ -189,6 +189,16 @@ limit_menu_msg = [
     'Привет, ты имеешь 50 бесплатных поисков, и %s бонусных. За сегодня использовано %s. К исчерпанию квоты на сегодня осталось %s поисков.',
     'Hi, you have 50 free searches and %s bonuses. %s used today. So until the quota is exhausted today, there are %s searches left.',
 ]
+pay_info = [
+    'Гаразд, після оплати тебе буде перенаправлено на сторінку t.me/%s/?start=XXXXXXXXXXX, після цього потрібно буде перейти в чат з ботом через цю сторінку. У параметрі start вказано код вашого оплаченого замовлення, ти можеш використовувати це посилання в якості подарункового, тому не передавай його нікому до тих пір, поки не використаєш.',
+    'Ладно, после оплаты тебя будет перенаправлено на страницу t.me/%s/?start=XXXXXXXXXXX, после этого нужно будет перейти в чат с ботом через эту страницу. В параметре start указан код вашего оплаченного заказа, ты можешь использовать эту ссылку в качестве подарочной, поэтому не передавай её никому до тех пор, пока не используешь.',
+    'Okay, after payment you will be redirected to the page t.me/%s/?start=XXXXXXXXXXX, after that you will need to go to the chat with the bot through this page. The start parameter contains the code of your paid order, you can use this link as a gift, so do not give it to anyone until you use it.',
+]
+pay_check = [
+    'Сума: %s\nБонус: %s',
+    'Сумма: %s\nБонус: %s',
+    'Sum: %s\nBonus: %s',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

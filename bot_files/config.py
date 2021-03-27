@@ -18,5 +18,6 @@ news_api_key = os.environ['NEWS_API_KEYS'].split()
 weather_api_key = os.environ['WEATHER_API_KEYS'].split()
 news_check_words = os.environ['NEWS_CHECK_WORDS'].split()
 user_agent_static = os.environ['USER_AGENT']
+qiwi_api_key = os.environ['QIWI_KEY']
 news_default_background = "%s/news-default-background.png" % bot_root
 news_finish_background = "%s/news-finish.png" % bot_root
