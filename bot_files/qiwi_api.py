@@ -24,7 +24,10 @@ async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
         comment=comment,
         successUrl=s_url,
     ))
-    return urlunsplit((SC, DOMAIN, PATH, query, ""))
+    return dict(
+        billid=bill,
+        url=urlunsplit((SC, DOMAIN, PATH, query, "")),
+    )
 
 
 # async def create_payment(amount, comment, bot_pseudo, token) -> dict:
