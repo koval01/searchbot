@@ -4,13 +4,13 @@ from config import qiwi_api_key, qiwi_api_key_secret
 import aiohttp, json
 
 
-async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
+async def create_payment_url(amount, bot_pseudo, token, comment=None) -> dict:
     """
     Запит до QIWI для стоврення платежу
     :param amount: Сума платежу в рублях
-    :param comment: Коментар платежу (ідентифікатор)
     :param bot_pseudo: Псевдонім бота для генерації посилання
     :param token: Ідентифікатор платежу для його перевірки
+    :param comment: Коментар платежу (ідентифікатор)
     :return: JSON відповідь переведена в словник
     """
     SC = 'https'
@@ -18,6 +18,8 @@ async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
     PATH = '/create'
     s_url = 'https://t.me/%s/?start=%s' % (bot_pseudo, token)
     bill = await get_random_string(199)
+    if not comment:
+        comment = 'Увеличение ежедневной квоты поиска для бота AWARE'
     query = urlencode(dict(
         publicKey=qiwi_api_key,
         billId=bill,
