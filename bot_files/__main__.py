@@ -145,7 +145,6 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 			)
 	else:
 		token = str(callback_query.data).replace('recheck_pay:', '')
-		await bot.send_chat_action(callback_query.from_user.id, 'typing')
 		await check_payment_local(token, callback_query)
 		await bot.answer_callback_query(callback_query.id)
 
@@ -507,14 +506,26 @@ async def check_payment_local(token, message) -> None:
 					db.update_custom_field(u, 'premium', bonus, 1)
 					db.update_custom_field_payments(token, 'status', 1) # Позначаємо як оплачений
 					d = await rand_hex_string()
-					await bot.send_message(u, msg.pay_success[ln] + '\n\n<code>%s</code>' % d)
+					if inline:
+						await bot.answer_callback_query(message.id, msg.pay_success[ln])
+					else:
+						await bot.send_message(u, msg.pay_success[ln] + '\n\n<code>%s</code>' % d)
 				else:
-					await bot.send_message(u, msg.already_been_paid[ln], reply_markup=button)
+					if inline:
+						await bot.answer_callback_query(message.id, msg.already_been_paid[ln])
+					else:
+						await bot.send_message(u, msg.already_been_paid[ln], reply_markup=button)
 			except Exception as e:
 				logging.error(e)
-				await bot.send_message(u, msg.unknown_pay_error[ln], reply_markup=button)
+				if inline:
+					await bot.answer_callback_query(message.id, msg.unknown_pay_error[ln])
+				else:
+					await bot.send_message(u, msg.unknown_pay_error[ln], reply_markup=button)
 		else:
-			await bot.send_message(u, msg.pay_error[ln] % data, reply_markup=button)
+			if inline:
+				await bot.answer_callback_query(message.id, msg.pay_error[ln] % data, True)
+			else:
+				await bot.send_message(u, msg.pay_error[ln] % data, reply_markup=button)
 	else:
 		await bot.send_message(u, msg.unknown_pay_error[ln])
 
