@@ -1,6 +1,7 @@
 from urllib.parse import urlunsplit, urlencode
 from api_module import get_random_string
-from config import qiwi_api_key
+from config import qiwi_api_key, qiwi_api_key_secret
+import aiohttp, json
 
 
 async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
@@ -30,21 +31,41 @@ async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
     )
 
 
-# async def create_payment(amount, comment, bot_pseudo, token) -> dict:
-#     """
-#     Запит до QIWI для стоврення платежу
-#     :param question: Текст запитання
-#     :return: JSON відповідь переведена в словник
-#     """
-#     url = 'https://oplata.qiwi.com/create'
-#     s_url = 'https://t.me/%s/?start=%s' % (bot_pseudo, token)
-#     for i in range(3):
-#         async with aiohttp.request('GET', url, params={
-#             "publicKey": qiwi_api_key,
-#             "billId": get_random_string(192),
-#             "amount": amount,
-#             "comment": comment,
-#             "successUrl": s_url,
-#         }) as response:
-#             if response.status == 200 and await response.text():
-#                 return json.loads(await response.text())
+async def check_payment(billid) -> dict:
+    """
+    Запит до QIWI для перевірки платежу
+    :param billid: Номер платежу (Ідентифікатор)
+    :return: JSON відповідь
+    """
+    url = f"https://api.qiwi.com/partner/bill/v1/bills/{billid}"
+    for i in range(1):
+        async with aiohttp.request('GET', url, headers={
+            "Authorization": f"Bearer {qiwi_api_key_secret}",
+            "Accept": "application/json",
+        }) as response:
+            if response.status == 200 and await response.text():
+                return json.loads(await response.text())
+
+
+async def verify_payment(billid, amount) -> str:
+    """
+    Перевірка платежу
+    :param billid: Номер платежу (Ідентифікатор)
+    :param amount: Сума яку користувач повинен був заплатити
+    :return: Булентний результат або строка в якій вказана помилка
+    """
+    data = await check_payment(billid) # Отримуємо інформацію про платіж
+    ok = 'PAID'
+    wait = 'WAITING'
+    if data:
+        if data['amount']['value'] == amount:
+            if data['status']['value'] == ok:
+                return True
+            elif data['status']['value'] == wait:
+                return 'Ошибка подтверждения. Платеж не было завершено / оплачено.'
+            else:
+                return 'Ошибка подтверждения. Платеж не найден или он недействительный.'
+        else:
+            return 'Сумма платежа неверна. Похоже, пользователь её изменил.'
+
+    return False
