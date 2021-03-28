@@ -470,6 +470,13 @@ async def lang(message: types.Message):
 	await limit_info(message)
 
 
+@dp.message_handler(commands=['test'])
+async def lang(message: types.Message):
+	from qiwi_api import create_payment_url
+	x = await create_payment_url(50, 'Тест оплаты', 'AwareSearchBot', 'tgh893h89g0j4j4')
+	await message.answer(x['url'])
+
+
 async def send_admins_msg(type, pseudo, fullname, user_id, text, reply_mk=None) -> None:
 	"""
 	Функція, що надсилає повідомлення адміністраторам

@@ -16,7 +16,7 @@ async def create_payment_url(amount, comment, bot_pseudo, token) -> dict:
     DOMAIN = 'oplata.qiwi.com'
     PATH = '/create'
     s_url = 'https://t.me/%s/?start=%s' % (bot_pseudo, token)
-    bill = await get_random_string(192)
+    bill = await get_random_string(199)
     query = urlencode(dict(
         publicKey=qiwi_api_key,
         billId=bill,
