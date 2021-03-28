@@ -2,3 +2,5 @@ wheel
 setuptools
 pip
 aiogram
+Pillow
+python-dotenv
