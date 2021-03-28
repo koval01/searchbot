@@ -2,7 +2,7 @@ import aiohttp, logging, json, string, re
 import messages as msg
 from random import choice, randint, shuffle
 from datetime import datetime
-from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words, weather_api_key
+from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words, weather_api_key, default_limit
 
 
 temp_memory_array = []
@@ -136,7 +136,7 @@ async def check_limit(message, db) -> bool:
 	prem = d[9]
 	dt = d[7]
 	limit = d[8]
-	default_max = 50
+	default_max = default_limit
 
 	if dt == day:
 		if not prem and limit >= default_max:

@@ -46,6 +46,7 @@ last_news_msg_get = []
 class AdminStates(StatesGroup):
 	contact_admin = State()
 	admin_ad_menu = State()
+	buy_bonus = State()
 
 
 @dp.callback_query_handler(lambda call_back: 'select_lang:' in call_back.data)
@@ -413,7 +414,7 @@ async def limit_info(message) -> None:
 	d = db.subscriber_get_from_user_id(u)[0]
 	prem = d[9]
 	limit = d[8]
-	default_max = 50
+	default_max = config.default_limit
 	exc = (default_max + prem) - limit
 	await bot.send_message(
 		u, msg.limit_menu_msg[ln] % (prem, limit, exc)
@@ -473,7 +474,7 @@ async def lang(message: types.Message):
 @dp.message_handler(commands=['test'])
 async def lang(message: types.Message):
 	from qiwi_api import create_payment_url
-	x = await create_payment_url(50, 'Тест оплаты', 'AwareSearchBot', 'tgh893h89g0j4j4')
+	x = await create_payment_url(50, 'AwareSearchBot', 'ga8h895h89jgs890j')
 	await message.answer(x['url'])
 
 

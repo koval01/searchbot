@@ -1,6 +1,6 @@
 from urllib.parse import urlunsplit, urlencode
 from api_module import get_random_string
-from config import qiwi_api_key, qiwi_api_key_secret
+from config import qiwi_api_key, qiwi_api_key_secret, default_limit, cut_price
 import aiohttp, json
 
 
@@ -19,7 +19,7 @@ async def create_payment_url(amount, bot_pseudo, token, comment=None) -> dict:
     s_url = 'https://t.me/%s/?start=%s' % (bot_pseudo, token)
     bill = await get_random_string(199)
     if not comment:
-        comment = 'Увеличение ежедневной квоты поиска для бота AWARE'
+        comment = 'Увеличение ежедневной квоты поиска для бота AWARE (Token: %s)' % token
     query = urlencode(dict(
         publicKey=qiwi_api_key,
         billId=bill,
@@ -62,7 +62,7 @@ async def verify_payment(billid, amount) -> str:
     if data:
         if data['amount']['value'] == amount:
             if data['status']['value'] == ok:
-                return True
+                return 'Успех!'
             elif data['status']['value'] == wait:
                 return 'Ошибка подтверждения. Платеж не было завершено / оплачено.'
             else:
@@ -70,4 +70,17 @@ async def verify_payment(billid, amount) -> str:
         else:
             return 'Сумма платежа неверна. Похоже, пользователь её изменил.'
 
-    return False
+
+async def get_amount_pay(bonus) -> dict:
+    """
+    Визначення суми платежу
+    :param bonus: Кількість бонусу
+    :return: dict price
+    """
+    x = round((bonus * 1.4) * (default_limit / cut_price))
+    default = default_limit + bonus
+    return dict(
+        bonuses=bonus,
+        rub_price=x,
+        new_limit=default
+    )

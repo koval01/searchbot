@@ -36,6 +36,10 @@ user_agent_static = os.environ['USER_AGENT']
 qiwi_api_key = os.environ['QIWI_KEY']
 qiwi_api_key_secret = os.environ['QIWI_KEY_SECRET']
 
+# BONUS SEARCHES
+default_limit = 50
+cut_price = 3.2 # Чем меньше - тем больше цена
+
 # NEWS API
 news_default_background = "%s/news-default-background.png" % bot_root
 news_finish_background = "%s/news-finish.png" % bot_root
