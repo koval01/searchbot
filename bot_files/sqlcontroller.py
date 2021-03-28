@@ -6,6 +6,7 @@ class SQLight:
     def __init__(self, database) -> None:
         """
         Ініціалізація
+        :param database: Файл бази даних
         :return: None
         """
         self.connection = sqlite3.connect(database)
@@ -18,6 +19,7 @@ class SQLight:
     def get_subscriptions(self, status = True) -> dict:
         """
         Словник всіх активних користувачів
+        :param status: Статус який потрібно задати
         :return: dict
         """
         with self.connection:
@@ -27,6 +29,7 @@ class SQLight:
     def subscriber_exists(self, user_id) -> bool:
         """
         Метод перевірки наявності користувача в БД
+        :param user_id: Ідентифікатор користувача
         :return: bool
         """
         with self.connection:
@@ -37,6 +40,7 @@ class SQLight:
     def subscriber_get_from_user_id(self, user_id) -> dict:
         """
         Функція для отримання даних користувача за ID
+        :param user_id: Ідентифікатор користувача
         :return: dict
         """
         with self.connection:
@@ -46,7 +50,11 @@ class SQLight:
 
     def update_custom_field(self, user_id, field, data, two=False) -> None:
         """
-        Оновлення кастомного значення
+        Оновлення кастомного значення в таблиці з користувачами
+        :param user_id: Ідентифікатор користувача
+        :param field: Колонка
+        :param data: Дані
+        :param two: Чи будемо додавати дані (арифметична дія)
         :return: None
         """
         with self.connection:
@@ -59,7 +67,11 @@ class SQLight:
 
     def update_custom_field_payments(self, token, field, data, two=False) -> None:
         """
-        Оновлення кастомного значення
+        Оновлення кастомного значення в платіжній таблиці
+        :param token: Токен платежу
+        :param field: Колонка
+        :param data: Дані
+        :param two: Чи будемо додавати дані (арифметична дія)
         :return: None
         """
         with self.connection:
@@ -72,7 +84,10 @@ class SQLight:
 
     def add_subscriber(self, user_id, realname, status = True) -> None:
         """
-        Додавання новго користувача
+        Додавання новго користувача в базу даних
+        :param user_id: Ідентифікатор користувача
+        :param realname: Повне ім'я профілю користувача
+        :param status: Статус користувача
         :return: None
         """
         with self.connection:
@@ -109,6 +124,8 @@ class SQLight:
     def update_subscription(self, user_id, status=True) -> None:
         """
         Оновлення підписки визначенного користувача
+        :param user_id: Ідентифікатор користувача
+        :param status: Статус користувача
         :return: None
         """
         with self.connection:
@@ -118,6 +135,8 @@ class SQLight:
     def update_lang(self, user_id, lang=1) -> None:
         """
         Оновлення мови визначенного користувача
+        :param user_id: Ідентифікатор користувача
+        :param lang: Мова
         :return: None
         """
         # 0 UA; 1 RU; 2 EN;
@@ -128,6 +147,8 @@ class SQLight:
     def update_ban(self, user_id, ban=1) -> None:
         """
         Оновлення статусу бану користувача
+        :param user_id: Ідентифікатор користувача
+        :param ban: Статус бану
         :return: None
         """
         # 0 unban; 1 ban;
@@ -138,6 +159,7 @@ class SQLight:
     def subscriber_get_lang(self, user_id) -> dict:
         """
         Функція для отримання мови користувача
+        :param user_id: Ідентифікатор користувача
         :return: dict
         """
         with self.connection:
