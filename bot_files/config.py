@@ -6,6 +6,8 @@ if DEBUG:
     API_TOKEN = os.environ['DEV_TOKEN']
     bot_root = "."
 else:
+    from dotenv import load_dotenv
+    load_dotenv()
     API_TOKEN = os.environ['DEPLOY_TOKEN']
     bot_root = "./awarebot"
 
