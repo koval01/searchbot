@@ -147,7 +147,7 @@ async def check_limit(message, db) -> bool:
 			up(u, 'limit_num', 1, 1)
 	else:
 		up(u, 'limit_day', day)
-		up(u, 'limit_num', 0)
+		up(u, 'limit_num', 1) # Записуємо цей запит як перший
 	return True
 
 

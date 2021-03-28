@@ -199,6 +199,16 @@ pay_check = [
     'Сумма: %s\nБонус: %s\n\nНе забудь сохранить чек, он нужен на случай неудачной автоматической проверки платежа.',
     'Sum: %s\nBonus: %s\n\nDo not forget to save the check, it is needed in case of failure of automatic verification of payment.',
 ]
+payment_create = [
+    'Вкажіть потрібну вам кількість додаткових пошуків',
+    'Укажите нужное вам количество дополнительных поисков',
+    'Specify the number of additional searches you need',
+]
+help_menu_msg = [
+    '/limit - Інформація про обмеження\n/bonus - Збільшити квоту\n/lang - Змінити мову',
+    '/limit - Информация об ограничении\n/bonus - Увеличить квоту\n/lang - Изменить язык',
+    '/limit - Restriction information\n/bonus - Increase quota\n/lang - Change language',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

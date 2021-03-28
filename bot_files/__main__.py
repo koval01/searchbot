@@ -471,11 +471,17 @@ async def lang(message: types.Message):
 	await limit_info(message)
 
 
-@dp.message_handler(commands=['test'])
+@dp.message_handler(commands=['bonus'])
 async def lang(message: types.Message):
-	from qiwi_api import create_payment_url
-	x = await create_payment_url(50, 'AwareSearchBot', 'ga8h895h89jgs890j')
-	await message.answer(x['url'])
+	ln = db.subscriber_get_lang(message.from_user.id)
+	await message.reply(msg.payment_create[ln], reply_markup=await cancel_menu(message))
+	await AdminStates.buy_bonus.set()
+
+
+@dp.message_handler(commands=['help', 'h'])
+async def lang(message: types.Message):
+	ln = db.subscriber_get_lang(message.from_user.id)
+	await message.answer(msg.help_menu_msg[ln])
 
 
 async def send_admins_msg(type, pseudo, fullname, user_id, text, reply_mk=None) -> None:
