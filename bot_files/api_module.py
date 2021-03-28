@@ -144,7 +144,7 @@ async def check_limit(message, db) -> bool:
 		elif limit >= default_max+prem:
 			return False
 		else:
-			up(u, 'limit_num', 1, 1)
+			up(u, 'limit_num', 1, 1) # Додаємо новий запит
 	else:
 		up(u, 'limit_day', day)
 		up(u, 'limit_num', 1) # Записуємо цей запит як перший
