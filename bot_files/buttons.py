@@ -8,15 +8,18 @@ cancel = ReplyKeyboardMarkup(resize_keyboard=True)
 cancel.add(KeyboardButton('Скасувати'))
 
 
-async def create_inline_buttons(buttons, load_more_button=False, limit=0) -> dict:
+async def create_inline_buttons(buttons, load_more_button=False, limit=0, url=False) -> dict:
     """Функция генерации Inline кнопок"""
 
     array_button = []
     global_array_buttons = []
+    type_ = "callback_data"
+    if url:
+        type_ = "url"
 
     def add_item(x, y):
         array_button = []
-        temp = {"text": f"{x}", "callback_data": f"{y}"}
+        temp = {"text": f"{x}", f"{type_}": f"{y}"}
         array_button.append(temp)
         global_array_buttons.append(array_button)
 

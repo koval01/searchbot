@@ -2,6 +2,7 @@ import aiohttp, logging, json, string, re
 import messages as msg
 from random import choice, randint, shuffle
 from datetime import datetime
+from string import hexdigits
 from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words, weather_api_key, default_limit
 
 
@@ -264,6 +265,19 @@ async def weather_detail(city, ln=1) -> str:
 			icon=data['weather'][0]['icon'],
 		)
 		return result
+
+
+async def rand_hex_string(lenght=16) -> str:
+	"""
+	Випадкова hex строка
+	:param lenght: Довжина строки
+	:return: hex
+	"""
+	a = []
+	for i in range(lenght):
+		a.append(choice(hexdigits))
+	return "".join(a).lower()
+
 
 async def random_news(ln) -> dict:
 	"""

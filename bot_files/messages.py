@@ -209,6 +209,51 @@ help_menu_msg = [
     '/limit - Информация об ограничении\n/bonus - Увеличить квоту\n/lang - Изменить язык',
     '/limit - Restriction information\n/bonus - Increase quota\n/lang - Change language',
 ]
+payment_sum_error = [
+    'Мінімальна кількість 5, а максимальна 1000',
+    'Минимальное количество 5, а максимальная 1000',
+    'The minimum number is 5 and the maximum is 1000',
+]
+payment_num_error = [
+    'Введіть кількість, тобто число',
+    'Введите количество, то есть число',
+    'Enter the number, ie the number',
+]
+payment_check = [
+    'До сплати %s RUB\nБонусів: %s',
+    'К оплате %s RUB\nБонусов: %s',
+    'To pay %s RUB\nBonuses: %s',
+]
+pay_button = [
+    'Сплатити',
+    'Оплатить',
+    'Pay',
+]
+pay_success = [
+    'Платіж успішно пройшов перевірку.',
+    'Платеж успешно прошел проверку.',
+    'Payment successfully verified.',
+]
+pay_error = [
+    'Під час перевірки виникла помилка: "%s"',
+    'Во время проверки возникла ошибка: "%s"',
+    'An error occurred while checking: "%s"',
+]
+unknown_pay_error = [
+    'Виникла неочікувана помилка під час перевірки статусу платежу.',
+    'Возникла непредвиденная ошибка при проверке статуса платежа.',
+    'An unexpected error occurred while checking the payment status.',
+]
+already_been_paid = [
+    'Помилка, цей токен вже було використано.',
+    'Ошибка, этот токен уже были использованы.',
+    'Error, this token has already been used.',
+]
+pay_check_repeat = [
+    'Перевірити',
+    'Проверить',
+    'Verify',
+]
 
 async def check_user_msg(string, ln) -> str:
     """

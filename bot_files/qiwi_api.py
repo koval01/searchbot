@@ -4,18 +4,21 @@ from config import qiwi_api_key, qiwi_api_key_secret, default_limit, cut_price
 import aiohttp, json
 
 
-async def create_payment_url(amount, bot_pseudo, token, comment=None) -> dict:
+async def create_payment_url(amount, bot_pseudo, db, message, bonus, comment=None) -> dict:
     """
     Запит до QIWI для стоврення платежу
     :param amount: Сума платежу в рублях
     :param bot_pseudo: Псевдонім бота для генерації посилання
-    :param token: Ідентифікатор платежу для його перевірки
+    :param db: Клас для роботи з базою даних
+    :param message: Тіло отриманого повідомлення від користувача
+    :param bonus: Число бонусів
     :param comment: Коментар платежу (ідентифікатор)
     :return: JSON відповідь переведена в словник
     """
     SC = 'https'
     DOMAIN = 'oplata.qiwi.com'
     PATH = '/create'
+    token = await get_random_string(40)
     s_url = 'https://t.me/%s/?start=%s' % (bot_pseudo, token)
     bill = await get_random_string(199)
     if not comment:
@@ -27,8 +30,14 @@ async def create_payment_url(amount, bot_pseudo, token, comment=None) -> dict:
         comment=comment,
         successUrl=s_url,
     ))
+    db.add_payment(
+        message.from_user.id,
+        message.from_user.full_name,
+        amount, bill, token, bonus
+    )
     return dict(
         billid=bill,
+        amount=amount,
         url=urlunsplit((SC, DOMAIN, PATH, query, "")),
     )
 
@@ -49,18 +58,20 @@ async def check_payment(billid) -> dict:
                 return json.loads(await response.text())
 
 
-async def verify_payment(billid, amount) -> str:
+async def verify_payment(token, db) -> str:
     """
     Перевірка платежу
-    :param billid: Номер платежу (Ідентифікатор)
-    :param amount: Сума яку користувач повинен був заплатити
-    :return: Булентний результат або строка в якій вказана помилка
+    :param token: Номер платежу (Ідентифікатор)
+    :return: Cтрока в якій вказана помилка
     """
+    payment = db.search_payment_by_token(token)[0]
+    billid = payment[4]
+    amount = payment[3]
     data = await check_payment(billid) # Отримуємо інформацію про платіж
     ok = 'PAID'
     wait = 'WAITING'
     if data:
-        if data['amount']['value'] == amount:
+        if round(float(data['amount']['value'])) == amount:
             if data['status']['value'] == ok:
                 return 'Успех!'
             elif data['status']['value'] == wait:

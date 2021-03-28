@@ -57,6 +57,19 @@ class SQLight:
             return self.cursor.execute(prepare_string, (data, user_id))
 
 
+    def update_custom_field_payments(self, token, field, data, two=False) -> None:
+        """
+        Оновлення кастомного значення
+        :return: None
+        """
+        with self.connection:
+            if not two:
+                prepare_string = "UPDATE `payments` SET `%s` = ? WHERE `token` = ?" % field
+            else:
+                prepare_string = "UPDATE `payments` SET `%s` = `%s` + ? WHERE `token` = ?" % (field, field)
+            return self.cursor.execute(prepare_string, (data, token))
+
+
     def add_subscriber(self, user_id, realname, status = True) -> None:
         """
         Додавання новго користувача
@@ -64,6 +77,33 @@ class SQLight:
         """
         with self.connection:
             return self.cursor.execute("INSERT INTO `subscriptions` (`user_id`, `status`, `real_name`) VALUES(?,?,?)", (user_id,status,realname,))
+
+
+    def add_payment(self, user_id, realname, amount, bill_id, token, bonus, status = False) -> None:
+        """
+        Додавання новго платежу
+        :param user_id: Telegram ідентифікатор користувача
+        :param realname: Ім'я та фамілія користувача
+        :param amount: Сума платежу
+        :param bill_id: Білінговий номер
+        :param token: Токен платежу
+        :param bonus: Число бонусів
+        :param status: Статус платежу (За стандартом встановлюєть - неоплачений)
+        :return: None
+        """
+        with self.connection:
+            return self.cursor.execute("INSERT INTO `payments` (`user_id`, `user_name`, `amount`, `bill_id`, `token`, `bonus`, `status`) VALUES(?,?,?,?,?,?,?)", (user_id,realname,amount,bill_id,token,bonus,status,))
+
+
+    def search_payment_by_token(self, token) -> dict:
+        """
+        Функція для отримання даних платежу за токеном
+        :param token: Токен платежу
+        :return: dict
+        """
+        with self.connection:
+            result = self.cursor.execute('SELECT * FROM `payments` WHERE `token` = ?', (token,)).fetchall()
+            return result
 
 
     def update_subscription(self, user_id, status=True) -> None:

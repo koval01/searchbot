@@ -1,4 +1,4 @@
-import config, logging, os
+import config, logging, os, re
 from asyncio import get_event_loop
 
 import messages as msg
@@ -14,8 +14,12 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from api_module import (
 	data_get, data_prepare, cleanhtml, search_and_decode_el,
 	title_cut, check_admin, random_news, check_news_search,
-	get_news, message_news_prepare, weather, check_limit
+	get_news, message_news_prepare, weather, check_limit,
+	rand_hex_string
 )
+
+from qiwi_api import create_payment_url as create_payment_qiwi
+from qiwi_api import get_amount_pay, verify_payment
 
 from weather_image import generator_weather_image
 
@@ -122,6 +126,28 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 				msg.already_unbanned[ln]
 			)
 	await bot.answer_callback_query(callback_query.id)
+
+
+@dp.callback_query_handler(lambda call_back: 'recheck_pay:' in call_back.data)
+async def process_callback_button1(callback_query: types.CallbackQuery):
+	ln = db.subscriber_get_lang(callback_query.from_user.id)
+	try:
+		await dp.throttle('recheck_pay', rate=1.5)
+	except Throttled:
+		try:
+			await dp.throttle('recheck_pay_', rate=1)
+		except Throttled:
+			pass
+		else:
+			await bot.answer_callback_query(
+				callback_query.id,
+				text=msg.slowly_pleas[ln],
+			)
+	else:
+		token = str(callback_query.data).replace('recheck_pay:', '')
+		await bot.send_chat_action(callback_query.from_user.id, 'typing')
+		await check_payment_local(token, callback_query)
+		await bot.answer_callback_query(callback_query.id)
 
 
 @dp.callback_query_handler(lambda call_back: 'inline_data:' in call_back.data)
@@ -451,14 +477,60 @@ async def cancel_menu(message) -> dict:
 	return c
 
 
+async def check_payment_local(token, message) -> None:
+	"""
+	Локальна перевірка платежу
+	:param token: Токен
+	:param message: Тіло повідомлення
+	:return: None
+	"""
+	u = message.from_user.id
+	try:
+		msg_ = message.id
+		inline = True
+	except Exception as e:
+		inline = False
+		logging.error(e)
+	ln = db.subscriber_get_lang(u)
+	data = await verify_payment(token, db)
+	if data:
+		but = msg.pay_check_repeat[ln]
+		button = await create_inline_buttons(
+			[[but, 'recheck_pay:%s' % token]]
+		)
+		if data == 'Успех!':
+			try:
+				payment = db.search_payment_by_token(token)[0]
+				bonus = payment[7]
+				status = payment[6]
+				if not status:
+					db.update_custom_field(u, 'premium', bonus, 1)
+					db.update_custom_field_payments(token, 'status', 1) # Позначаємо як оплачений
+					d = await rand_hex_string()
+					await bot.send_message(u, msg.pay_success[ln] + '\n\n<code>%s</code>' % d)
+				else:
+					await bot.send_message(u, msg.already_been_paid[ln], reply_markup=button)
+			except Exception as e:
+				logging.error(e)
+				await bot.send_message(u, msg.unknown_pay_error[ln], reply_markup=button)
+		else:
+			await bot.send_message(u, msg.pay_error[ln] % data, reply_markup=button)
+	else:
+		await bot.send_message(u, msg.unknown_pay_error[ln])
+
+
 @dp.message_handler(commands=['start'])
 async def subscribe(message: types.Message):
-	if not db.subscriber_exists(message.from_user.id):
-		db.add_subscriber(message.from_user.id, message.from_user.full_name)
-		logging.info("Save user [ID: %s] [FULL_NAME: %s]" % (message.from_user.id, message.from_user.full_name))
-		await lang_select(message)
+	if '/start ' in message.text:
+		token = message.text.replace('/start ', '')
+		await check_payment_local(token, message)
 	else:
-		await message.answer(msg.start_message[db.subscriber_get_lang(message.from_user.id)], reply_markup=await menu(message))
+		if not db.subscriber_exists(message.from_user.id):
+			db.add_subscriber(message.from_user.id, message.from_user.full_name)
+			logging.info("Save user [ID: %s] [FULL_NAME: %s]" % (message.from_user.id, message.from_user.full_name))
+			await lang_select(message)
+		else:
+			await message.answer(msg.start_message[db.subscriber_get_lang(message.from_user.id)], reply_markup=await menu(message))
 
 
 @dp.message_handler(commands=['lang'])
@@ -476,6 +548,49 @@ async def lang(message: types.Message):
 	ln = db.subscriber_get_lang(message.from_user.id)
 	await message.reply(msg.payment_create[ln], reply_markup=await cancel_menu(message))
 	await AdminStates.buy_bonus.set()
+
+
+@dp.message_handler(state=AdminStates.buy_bonus)
+async def state_check_func_ntf(message: types.Message, state: FSMContext):
+	cancel = False
+	ln = db.subscriber_get_lang(message.from_user.id)
+	if message.text == msg.cancel_btns[ln]:
+		await message.reply(msg.cancel_msg[ln],  reply_markup=await menu(message))
+		cancel = True
+
+	if not cancel:
+		if len(message.text) < 8:
+			num = int(''.join(filter(str.isdigit, message.text)))
+			if num:
+				if num > 5 and num <= 1000:
+					a = await get_amount_pay(num)
+					amount = a['rub_price']
+					b = await bot.get_me()
+					pseudo = b.username
+					p_data = await create_payment_qiwi(
+						amount, pseudo, db, message, num
+					)
+					url = p_data['url']
+					buttons = await create_inline_buttons(
+						[[msg.pay_button[ln], url]], url=True
+					)
+					await message.reply(
+						msg.payment_check[ln] % (amount, num),
+						reply_markup=buttons
+					)
+					await message.reply(
+						msg.menu_update_notify[ln],
+						reply_markup=await menu(message)
+					)
+				else:
+					await message.reply(msg.payment_sum_error[ln], reply_markup=await menu(message))
+			else:
+				await message.reply(msg.payment_num_error[ln], reply_markup=await menu(message))
+		else:
+			await message.reply(msg.long_msg[ln], reply_markup=await menu(message))
+
+	return await state.finish()
+
 
 
 @dp.message_handler(commands=['help', 'h'])
