@@ -757,12 +757,13 @@ async def handle_message_received_text(message):
 
 @dp.message_handler(content_types=['location'])
 async def handle_message_received_text(message):
-	ln = db.subscriber_get_lang(message.from_user.id)
-	w = await weather(message.location.latitude, message.location.longitude, ln)
-	x = await generator_weather_image(w, ln)
-	await message.reply_photo(open(x, 'rb'))
-	from os import remove
-	remove(x)
+	# ln = db.subscriber_get_lang(message.from_user.id)
+	# w = await weather(message.location.latitude, message.location.longitude, ln)
+	# x = await generator_weather_image(w, ln)
+	# await message.reply_photo(open(x, 'rb'))
+	# from os import remove
+	# remove(x)
+	await message.reply('We are sorry, but this feature is still under development.')
 
 
 async def shutdown(dispatcher: Dispatcher):
