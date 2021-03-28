@@ -284,7 +284,6 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 							open(config.news_default_background, 'rb'),
 							nw_str,
 							reply_markup=nw_buttons,
-							disable_web_page_preview=True,
 						)
 				else:
 					n_msg = await bot.send_photo(
@@ -292,7 +291,6 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						open(config.news_default_background, 'rb'),
 						nw_str,
 						reply_markup=nw_buttons,
-						disable_web_page_preview=True,
 					)
 				await local_news_id_update(callback_query.from_user.id, n_msg)
 			else:
@@ -360,7 +358,6 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 							open(config.news_default_background, 'rb'),
 							nw_str,
 							reply_markup=nw_buttons,
-							disable_web_page_preview=True,
 						)
 				else:
 					n_msg = await bot.send_photo(
@@ -368,7 +365,6 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 						open(config.news_default_background, 'rb'),
 						nw_str,
 						reply_markup=nw_buttons,
-						disable_web_page_preview=True,
 					)
 				await local_news_id_update(callback_query.from_user.id, n_msg)
 			else:
