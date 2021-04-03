@@ -5,11 +5,13 @@ DEBUG = False
 if DEBUG:
     API_TOKEN = os.environ['DEV_TOKEN']
     bot_root = "."
+    DB_AUTH = dict(host='localhost', user='root', password='root', database='aware')
 else:
     from dotenv import load_dotenv
     load_dotenv()
     API_TOKEN = os.environ['DEPLOY_TOKEN']
     bot_root = "./awarebot"
+    DB_AUTH = dict(host='localhost', user='root', password='Cbq5Mts2hmp7VVwmjvS0QqwxvzqD7hlsrxsU', database='aware')
 
 # ADMINS GET
 admins = os.environ['ADMINS'].split()
