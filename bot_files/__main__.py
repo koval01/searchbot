@@ -41,7 +41,8 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, loop=loop, storage=storage)
 dp.middleware.setup(LoggingMiddleware())
 
-db = SQLight()
+db_path = os.path.abspath("%s/db.db" % config.bot_root)
+db = SQLight(db_path)
 
 news_array = []
 last_news_msg_get = []
