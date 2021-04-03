@@ -23,7 +23,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                return cursor.execute("SELECT * FROM `subscriptions` WHERE `status` = ?", (status,)).fetchall()
+                return cursor.execute("SELECT * FROM `subscriptions` WHERE `status` = %s", (status,)).fetchall()
 
 
     def subscriber_exists(self, user_id) -> bool:
@@ -37,7 +37,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                result = cursor.execute('SELECT * FROM `subscriptions` WHERE `user_id` = ?', (user_id,)).fetchall()
+                result = cursor.execute('SELECT * FROM `subscriptions` WHERE `user_id` = %s', (user_id,)).fetchall()
                 return bool(len(result))
 
 
@@ -52,7 +52,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                result = cursor.execute('SELECT * FROM `subscriptions` WHERE `user_id` = ?', (user_id,)).fetchall()
+                result = cursor.execute('SELECT * FROM `subscriptions` WHERE `user_id` = %s', (user_id,)).fetchall()
                 return result
 
 
@@ -71,9 +71,9 @@ class SQLight:
         with connection:
             with connection.cursor() as cursor:
                 if not two:
-                    prepare_string = "UPDATE `subscriptions` SET `%s` = ? WHERE `user_id` = ?" % field
+                    prepare_string = "UPDATE `subscriptions` SET `%s` = %s WHERE `user_id` = %s" % field
                 else:
-                    prepare_string = "UPDATE `subscriptions` SET `%s` = `%s` + ? WHERE `user_id` = ?" % (field, field)
+                    prepare_string = "UPDATE `subscriptions` SET `%s` = `%s` + %s WHERE `user_id` = %s" % (field, field)
                 return cursor.execute(prepare_string, (data, user_id))
 
 
@@ -92,9 +92,9 @@ class SQLight:
         with connection:
             with connection.cursor() as cursor:
                 if not two:
-                    prepare_string = "UPDATE `payments` SET `%s` = ? WHERE `token` = ?" % field
+                    prepare_string = "UPDATE `payments` SET `%s` = %s WHERE `token` = %s" % field
                 else:
-                    prepare_string = "UPDATE `payments` SET `%s` = `%s` + ? WHERE `token` = ?" % (field, field)
+                    prepare_string = "UPDATE `payments` SET `%s` = `%s` + %s WHERE `token` = %s" % (field, field)
                 return cursor.execute(prepare_string, (data, token))
 
 
@@ -111,7 +111,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                return cursor.execute("INSERT INTO `subscriptions` (`user_id`, `status`, `real_name`) VALUES(?,?,?)", (user_id,status,realname,))
+                return cursor.execute("INSERT INTO `subscriptions` (`user_id`, `status`, `real_name`) VALUES(%s,%s,%s)", (user_id,status,realname,))
 
 
     def add_payment(self, user_id, realname, amount, bill_id, token, bonus, status = False) -> None:
@@ -131,7 +131,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                return cursor.execute("INSERT INTO `payments` (`user_id`, `user_name`, `amount`, `bill_id`, `token`, `bonus`, `status`) VALUES(?,?,?,?,?,?,?)", (user_id,realname,amount,bill_id,token,bonus,status,))
+                return cursor.execute("INSERT INTO `payments` (`user_id`, `user_name`, `amount`, `bill_id`, `token`, `bonus`, `status`) VALUES(%s,%s,%s,%s,%s,%s,%s)", (user_id,realname,amount,bill_id,token,bonus,status,))
 
 
     def search_payment_by_token(self, token) -> dict:
@@ -145,7 +145,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                result = cursor.execute('SELECT * FROM `payments` WHERE `token` = ?', (token,)).fetchall()
+                result = cursor.execute('SELECT * FROM `payments` WHERE `token` = %s', (token,)).fetchall()
                 return result
 
 
@@ -161,7 +161,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                return cursor.execute("UPDATE `subscriptions` SET `status` = ? WHERE `user_id` = ?", (status, user_id))
+                return cursor.execute("UPDATE `subscriptions` SET `status` = %s WHERE `user_id` = %s", (status, user_id))
 
 
     def update_lang(self, user_id, lang=1) -> None:
@@ -177,7 +177,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                return cursor.execute("UPDATE `subscriptions` SET `lang` = ? WHERE `user_id` = ?", (lang, user_id))
+                return cursor.execute("UPDATE `subscriptions` SET `lang` = %s WHERE `user_id` = %s", (lang, user_id))
 
 
     def update_ban(self, user_id, ban=1) -> None:
@@ -193,7 +193,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                return cursor.execute("UPDATE `subscriptions` SET `ban` = ? WHERE `user_id` = ?", (ban, user_id))
+                return cursor.execute("UPDATE `subscriptions` SET `ban` = %s WHERE `user_id` = %s", (ban, user_id))
 
 
     def subscriber_get_lang(self, user_id) -> dict:
@@ -207,7 +207,7 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                result = cursor.execute('SELECT `lang` FROM `subscriptions` WHERE `user_id` = ?', (user_id,)).fetchall()
+                result = cursor.execute('SELECT `lang` FROM `subscriptions` WHERE `user_id` = %s', (user_id,)).fetchall()
                 return result[0][0]
 
 
@@ -225,6 +225,6 @@ class SQLight:
 
         with connection:
             with connection.cursor() as cursor:
-                cursor.execute("INSERT INTO `contact` (`pseudo`, `fullname`, `user_id`, `text`) VALUES(?,?,?,?)", (pseudo, fullname, user_id, text,))
+                cursor.execute("INSERT INTO `contact` (`pseudo`, `fullname`, `user_id`, `text`) VALUES(%s,%s,%s,%s)", (pseudo, fullname, user_id, text,))
                 result = cursor.execute('SELECT last_insert_rowid();').fetchall()
                 return result
