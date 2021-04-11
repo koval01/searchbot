@@ -1,6 +1,6 @@
 import os
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     API_TOKEN = os.environ['DEV_TOKEN']
