@@ -15,7 +15,7 @@ from api_module import (
 	data_get, data_prepare, cleanhtml, search_and_decode_el,
 	title_cut, check_admin, random_news, check_news_search,
 	get_news, message_news_prepare, weather, check_limit,
-	rand_hex_string
+	rand_hex_string, qwriter_create_page
 )
 
 from qiwi_api import create_payment_url as create_payment_qiwi
@@ -170,15 +170,27 @@ async def process_callback_button1(callback_query: types.CallbackQuery):
 		el = await search_and_decode_el(token)
 		if el:
 			me = await bot.get_me()
-			await bot.send_message(
-				chat_id=callback_query.from_user.id,
-				text=msg.search_data_send_template[ln] % (
-					el[0], el[1], el[2], f'@{me.username}'
-				),
-				disable_web_page_preview=True,
-				reply_markup=await menu(callback_query),
-			)
-
+			lc_menu = await menu(callback_query)
+			try:
+				iv_link = await qwriter_create_page(el[0])
+				await bot.send_message(
+					chat_id=callback_query.from_user.id,
+					text=msg.search_data_send_template[ln] % (
+						iv_link, el[0], el[1], el[2], f'@{me.username}'
+					),
+					disable_web_page_preview=False,
+					reply_markup=lc_menu,
+				)
+			except Exception as e:
+				logging.error(e)
+				await bot.send_message(
+					chat_id=callback_query.from_user.id,
+					text=msg.search_data_send_template_no_iv[ln] % (
+						el[0], el[1], el[2], f'@{me.username}'
+					),
+					disable_web_page_preview=True,
+					reply_markup=lc_menu,
+				)
 			d = callback_query.data
 			buttons = callback_query.message.reply_markup
 			button_name = await get_button_name(d, buttons)
@@ -752,7 +764,7 @@ async def handle_message_received_text(message):
 
 
 @dp.message_handler(content_types=['location'])
-async def handle_message_received_text(message):
+async def handle_message_received_location(message):
 	# ln = db.subscriber_get_lang(message.from_user.id)
 	# w = await weather(message.location.latitude, message.location.longitude, ln)
 	# x = await generator_weather_image(w, ln)

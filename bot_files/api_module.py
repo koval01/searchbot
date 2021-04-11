@@ -1,9 +1,13 @@
-import aiohttp, logging, json, string, re
+import aiohttp, logging, json, string, re, urllib
 import messages as msg
+from urllib.parse import urlunsplit, urlencode
 from random import choice, randint, shuffle
 from datetime import datetime
 from string import hexdigits
-from config import api_host_search, api_key, cx, admins, news_api_key, news_check_words, weather_api_key, default_limit
+from bs4 import BeautifulSoup
+from config import api_host_search, api_key, cx, admins, \
+	news_api_key, news_check_words, weather_api_key, \
+	default_limit, qwriter_api, user_agent_static
 
 
 temp_memory_array = []
@@ -24,6 +28,28 @@ async def data_get(question) -> dict:
 		}) as response:
 			if response.status == 200 and await response.text():
 				return json.loads(await response.text())
+
+
+async def qwriter_create_page(link) -> dict:
+	"""
+	Створення сторінки на qwriter
+	:param link: Посилання на сторінку яку потрібно обробити
+	:return: JSON відповідь переведена в словник
+	{
+		"done": true,
+		"link": "https://t.me/iv?url=..."
+	}
+	"""
+	qwriter_api_host = 'https://www.q-writer.com/aware_api/'
+	for i in range(1):
+		async with aiohttp.request('POST', qwriter_api_host, data={
+			"api_key": qwriter_api,
+			"link": link,
+		}, headers={
+			"User-Agent": user_agent_static
+		}) as response:
+			if response.status == 200 and await response.text():
+				return json.loads(await response.text())['link']
 
 
 async def data_prepare(data) -> list:

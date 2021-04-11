@@ -5,6 +5,7 @@ import datetime
 import typing
 
 from . import base, fields
+from .chat_invite_link import ChatInviteLink
 from .chat_location import ChatLocation
 from .chat_member import ChatMember
 from .chat_permissions import ChatPermissions
@@ -34,6 +35,7 @@ class Chat(base.TelegramObject):
     pinned_message: 'Message' = fields.Field(base='Message')
     permissions: ChatPermissions = fields.Field(base=ChatPermissions)
     slow_mode_delay: base.Integer = fields.Field()
+    message_auto_delete_time: base.Integer = fields.Field()
     sticker_set_name: base.String = fields.Field()
     can_set_sticker_set: base.Boolean = fields.Field()
     linked_chat_id: base.Integer = fields.Field()
@@ -113,7 +115,7 @@ class Chat(base.TelegramObject):
 
     async def update_chat(self):
         """
-        User this method to update Chat data
+        Use this method to update Chat data
 
         :return: None
         """
@@ -185,30 +187,47 @@ class Chat(base.TelegramObject):
         """
         return await self.bot.set_chat_description(self.id, description)
 
-    async def kick(self, user_id: base.Integer,
-                   until_date: typing.Union[
-                       base.Integer, datetime.datetime, datetime.timedelta, None] = None) -> base.Boolean:
+    async def kick(self,
+                   user_id: base.Integer,
+                   until_date: typing.Union[base.Integer, datetime.datetime,
+                                            datetime.timedelta, None] = None,
+                   revoke_messages: typing.Optional[base.Boolean] = None,
+                   ) -> base.Boolean:
         """
         Use this method to kick a user from a group, a supergroup or a channel.
-        In the case of supergroups and channels, the user will not be able to return to the group
-        on their own using invite links, etc., unless unbanned first.
+        In the case of supergroups and channels, the user will not be able to return
+        to the chat on their own using invite links, etc., unless unbanned first.
 
-        The bot must be an administrator in the chat for this to work and must have the appropriate admin rights.
-
-        Note: In regular groups (non-supergroups), this method will only work if the ‘All Members Are Admins’ setting
-        is off in the target group.
-        Otherwise members may only be removed by the group's creator or by the member that added them.
+        The bot must be an administrator in the chat for this to work and must have
+        the appropriate admin rights.
 
         Source: https://core.telegram.org/bots/api#kickchatmember
 
         :param user_id: Unique identifier of the target user
         :type user_id: :obj:`base.Integer`
-        :param until_date: Date when the user will be unbanned, unix time.
-        :type until_date: :obj:`typing.Optional[base.Integer]`
-        :return: Returns True on success.
+
+        :param until_date: Date when the user will be unbanned. If user is banned
+            for more than 366 days or less than 30 seconds from the current time they
+            are considered to be banned forever. Applied for supergroups and channels
+            only.
+        :type until_date: :obj:`typing.Union[base.Integer, datetime.datetime,
+            datetime.timedelta, None]`
+
+        :param revoke_messages: Pass True to delete all messages from the chat for
+            the user that is being removed. If False, the user will be able to see
+            messages in the group that were sent before the user was removed. Always
+            True for supergroups and channels.
+        :type revoke_messages: :obj:`typing.Optional[base.Boolean]`
+
+        :return: Returns True on success
         :rtype: :obj:`base.Boolean`
         """
-        return await self.bot.kick_chat_member(self.id, user_id=user_id, until_date=until_date)
+        return await self.bot.kick_chat_member(
+            chat_id=self.id,
+            user_id=user_id,
+            until_date=until_date,
+            revoke_messages=revoke_messages,
+        )
 
     async def unban(self,
                     user_id: base.Integer,
@@ -553,6 +572,50 @@ class Chat(base.TelegramObject):
             self.invite_link = await self.bot.export_chat_invite_link(self.id)
 
         return self.invite_link
+
+    async def create_invite_link(self,
+                                 expire_date: typing.Union[base.Integer, datetime.datetime,
+                                                           datetime.timedelta, None] = None,
+                                 member_limit: typing.Optional[base.Integer] = None,
+                                 ) -> ChatInviteLink:
+        """ Shortcut for createChatInviteLink method. """
+        return await self.bot.create_chat_invite_link(
+            chat_id=self.id,
+            expire_date=expire_date,
+            member_limit=member_limit,
+        )
+
+    async def edit_invite_link(self,
+                               invite_link: base.String,
+                               expire_date: typing.Union[base.Integer, datetime.datetime,
+                                                         datetime.timedelta, None] = None,
+                               member_limit: typing.Optional[base.Integer] = None,
+                               ) -> ChatInviteLink:
+        """ Shortcut for editChatInviteLink method. """
+        return await self.bot.edit_chat_invite_link(
+            chat_id=self.id,
+            invite_link=invite_link,
+            expire_date=expire_date,
+            member_limit=member_limit,
+        )
+
+    async def revoke_invite_link(self,
+                                 invite_link: base.String,
+                                 ) -> ChatInviteLink:
+        """ Shortcut for revokeChatInviteLink method. """
+        return await self.bot.revoke_chat_invite_link(
+            chat_id=self.id,
+            invite_link=invite_link,
+        )
+
+    async def delete_message(self,
+                             message_id: base.Integer,
+                             ) -> base.Boolean:
+        """ Shortcut for deleteMessage method. """
+        return await self.bot.delete_message(
+            chat_id=self.id,
+            message_id=message_id,
+        )
 
     def __int__(self):
         return self.id

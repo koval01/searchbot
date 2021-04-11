@@ -1,6 +1,6 @@
 import os
 
-DEBUG = False
+DEBUG = True
 
 if DEBUG:
     API_TOKEN = os.environ['DEV_TOKEN']
@@ -37,6 +37,9 @@ user_agent_static = os.environ['USER_AGENT']
 # QIWI
 qiwi_api_key = os.environ['QIWI_KEY']
 qiwi_api_key_secret = os.environ['QIWI_KEY_SECRET']
+
+# Q-Writer
+qwriter_api = os.environ['QWRITER_API_KEY']
 
 # BONUS SEARCHES
 default_limit = 50

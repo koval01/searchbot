@@ -74,9 +74,14 @@ search_done_msg = [
     'The search query "<b>%s</b>" found approximately <b>%s</b> results. Of these, <b>%s</b> the most relevant are shown. (<b>%s</b> sec.)',
 ]
 search_data_send_template = [
-    '<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
-    '<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
-    '<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
+    '<a href="%s">🔗</a><a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
+    '<a href="%s">🔗</a><a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
+    '<a href="%s">🔗</a><a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
+]
+search_data_send_template_no_iv = [
+    '🔗<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
+    '🔗<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
+    '🔗<a href="%s"><b>%s</b></a>\n\n%s\n\n%s',
 ]
 cancel_btns = [
     'Скасувати',

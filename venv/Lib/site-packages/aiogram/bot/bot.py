@@ -161,8 +161,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         files = {}
         prepare_file(payload, files, 'certificate', certificate)
 
-        result = await self.request(api.Methods.SET_WEBHOOK, payload, files)
-        return result
+        return await self.request(api.Methods.SET_WEBHOOK, payload, files)
 
     async def delete_webhook(self,
                              drop_pending_updates: typing.Optional[base.Boolean] = None,
@@ -181,8 +180,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.DELETE_WEBHOOK, payload)
-        return result
+        return await self.request(api.Methods.DELETE_WEBHOOK, payload)
 
     async def get_webhook_info(self) -> types.WebhookInfo:
         """
@@ -232,8 +230,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.LOG_OUT, payload)
-        return result
+        return await self.request(api.Methods.LOG_OUT, payload)
 
     @deprecated("This method will be renamed to `close` in aiogram v3.0")
     async def close_bot(self) -> base.Boolean:
@@ -251,8 +248,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.CLOSE, payload)
-        return result
+        return await self.request(api.Methods.CLOSE, payload)
 
     async def send_message(self,
                            chat_id: typing.Union[base.Integer, base.String],
@@ -1506,8 +1502,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SEND_CHAT_ACTION, payload)
-        return result
+        return await self.request(api.Methods.SEND_CHAT_ACTION, payload)
 
     async def get_user_profile_photos(self, user_id: base.Integer, offset: typing.Optional[base.Integer] = None,
                                       limit: typing.Optional[base.Integer] = None) -> types.UserProfilePhotos:
@@ -1550,36 +1545,50 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         result = await self.request(api.Methods.GET_FILE, payload)
         return types.File(**result)
 
-    async def kick_chat_member(self, chat_id: typing.Union[base.Integer, base.String], user_id: base.Integer,
-                               until_date: typing.Union[
-                                   base.Integer, datetime.datetime, datetime.timedelta, None] = None) -> base.Boolean:
+    async def kick_chat_member(self,
+                               chat_id: typing.Union[base.Integer, base.String],
+                               user_id: base.Integer,
+                               until_date: typing.Union[base.Integer, datetime.datetime,
+                                                        datetime.timedelta, None] = None,
+                               revoke_messages: typing.Optional[base.Boolean] = None,
+                               ) -> base.Boolean:
         """
         Use this method to kick a user from a group, a supergroup or a channel.
-        In the case of supergroups and channels, the user will not be able to return to the group
-        on their own using invite links, etc., unless unbanned first.
+        In the case of supergroups and channels, the user will not be able to return
+        to the chat on their own using invite links, etc., unless unbanned first.
 
-        The bot must be an administrator in the chat for this to work and must have the appropriate admin rights.
-
-        Note: In regular groups (non-supergroups), this method will only work if the ‘All Members Are Admins’ setting
-        is off in the target group.
-        Otherwise members may only be removed by the group's creator or by the member that added them.
+        The bot must be an administrator in the chat for this to work and must have
+        the appropriate admin rights.
 
         Source: https://core.telegram.org/bots/api#kickchatmember
 
-        :param chat_id: Unique identifier for the target group or username of the target supergroup or channel
+        :param chat_id: Unique identifier for the target group or username of the
+            target supergroup or channel (in the format @channelusername)
         :type chat_id: :obj:`typing.Union[base.Integer, base.String]`
+
         :param user_id: Unique identifier of the target user
         :type user_id: :obj:`base.Integer`
-        :param until_date: Date when the user will be unbanned, unix time
-        :type until_date: :obj:`typing.Optional[base.Integer]`
+
+        :param until_date: Date when the user will be unbanned. If user is banned
+            for more than 366 days or less than 30 seconds from the current time they
+            are considered to be banned forever. Applied for supergroups and channels
+            only.
+        :type until_date: :obj:`typing.Union[base.Integer, datetime.datetime,
+            datetime.timedelta, None]`
+
+        :param revoke_messages: Pass True to delete all messages from the chat for
+            the user that is being removed. If False, the user will be able to see
+            messages in the group that were sent before the user was removed. Always
+            True for supergroups and channels.
+        :type revoke_messages: :obj:`typing.Optional[base.Boolean]`
+
         :return: Returns True on success
         :rtype: :obj:`base.Boolean`
         """
         until_date = prepare_arg(until_date)
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.KICK_CHAT_MEMBER, payload)
-        return result
+        return await self.request(api.Methods.KICK_CHAT_MEMBER, payload)
 
     async def unban_chat_member(self,
                                 chat_id: typing.Union[base.Integer, base.String],
@@ -1612,8 +1621,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.UNBAN_CHAT_MEMBER, payload)
-        return result
+        return await self.request(api.Methods.UNBAN_CHAT_MEMBER, payload)
 
     async def restrict_chat_member(self, chat_id: typing.Union[base.Integer, base.String],
                                    user_id: base.Integer,
@@ -1668,17 +1676,18 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
                               f"passing regular argument {payload[permission]}",
                               DeprecationWarning, stacklevel=2)
 
-        result = await self.request(api.Methods.RESTRICT_CHAT_MEMBER, payload)
-        return result
+        return await self.request(api.Methods.RESTRICT_CHAT_MEMBER, payload)
 
     async def promote_chat_member(self,
                                   chat_id: typing.Union[base.Integer, base.String],
                                   user_id: base.Integer,
                                   is_anonymous: typing.Optional[base.Boolean] = None,
+                                  can_manage_chat: typing.Optional[base.Boolean] = None,
                                   can_change_info: typing.Optional[base.Boolean] = None,
                                   can_post_messages: typing.Optional[base.Boolean] = None,
                                   can_edit_messages: typing.Optional[base.Boolean] = None,
                                   can_delete_messages: typing.Optional[base.Boolean] = None,
+                                  can_manage_voice_chats: typing.Optional[base.Boolean] = None,
                                   can_invite_users: typing.Optional[base.Boolean] = None,
                                   can_restrict_members: typing.Optional[base.Boolean] = None,
                                   can_pin_messages: typing.Optional[base.Boolean] = None,
@@ -1700,6 +1709,11 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         :param is_anonymous: Pass True, if the administrator's presence in the chat is hidden
         :type is_anonymous: :obj:`typing.Optional[base.Boolean]`
 
+        :param can_manage_chat: Pass True, if the administrator can access the chat event log, chat statistics,
+            message statistics in channels, see channel members, see anonymous administrators in supergroups
+            and ignore slow mode. Implied by any other administrator privilege
+        :type can_manage_chat: :obj:`typing.Optional[base.Boolean]`
+
         :param can_change_info: Pass True, if the administrator can change chat title, photo and other settings
         :type can_change_info: :obj:`typing.Optional[base.Boolean]`
 
@@ -1711,6 +1725,9 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
 
         :param can_delete_messages: Pass True, if the administrator can delete messages of other users
         :type can_delete_messages: :obj:`typing.Optional[base.Boolean]`
+
+        :param can_manage_voice_chats: Pass True, if the administrator can manage voice chats, supergroups only
+        :type can_manage_voice_chats: :obj:`typing.Optional[base.Boolean]`
 
         :param can_invite_users: Pass True, if the administrator can invite new users to the chat
         :type can_invite_users: :obj:`typing.Optional[base.Boolean]`
@@ -1731,8 +1748,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.PROMOTE_CHAT_MEMBER, payload)
-        return result
+        return await self.request(api.Methods.PROMOTE_CHAT_MEMBER, payload)
 
     async def set_chat_administrator_custom_title(self, chat_id: typing.Union[base.Integer, base.String],
                                                   user_id: base.Integer, custom_title: base.String) -> base.Boolean:
@@ -1750,8 +1766,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_CHAT_ADMINISTRATOR_CUSTOM_TITLE, payload)
-        return result
+        return await self.request(api.Methods.SET_CHAT_ADMINISTRATOR_CUSTOM_TITLE, payload)
 
     async def set_chat_permissions(self, chat_id: typing.Union[base.Integer, base.String],
                                    permissions: types.ChatPermissions) -> base.Boolean:
@@ -1769,8 +1784,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         permissions = prepare_arg(permissions)
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_CHAT_PERMISSIONS, payload)
-        return result
+        return await self.request(api.Methods.SET_CHAT_PERMISSIONS, payload)
 
     async def export_chat_invite_link(self, chat_id: typing.Union[base.Integer, base.String]) -> base.String:
         """
@@ -1786,8 +1800,98 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.EXPORT_CHAT_INVITE_LINK, payload)
-        return result
+        return await self.request(api.Methods.EXPORT_CHAT_INVITE_LINK, payload)
+
+    async def create_chat_invite_link(self,
+                                      chat_id: typing.Union[base.Integer, base.String],
+                                      expire_date: typing.Union[base.Integer, datetime.datetime,
+                                                                datetime.timedelta, None] = None,
+                                      member_limit: typing.Optional[base.Integer] = None,
+                                      ) -> types.ChatInviteLink:
+        """
+        Use this method to create an additional invite link for a chat.
+        The bot must be an administrator in the chat for this to work and must have
+        the appropriate admin rights. The link can be revoked using the method
+        revokeChatInviteLink.
+
+        Source: https://core.telegram.org/bots/api#createchatinvitelink
+
+        :param chat_id: Unique identifier for the target chat or username of the
+            target channel (in the format @channelusername)
+        :type chat_id: :obj:`typing.Union[base.Integer, base.String]`
+
+        :param expire_date: Point in time when the link will expire
+        :type expire_date: :obj:`typing.Union[base.Integer, datetime.datetime,
+            datetime.timedelta, None]`
+
+        :param member_limit: Maximum number of users that can be members of the chat
+            simultaneously after joining the chat via this invite link; 1-99999
+        :type member_limit: :obj:`typing.Optional[base.Integer]`
+
+        :return: the new invite link as ChatInviteLink object.
+        :rtype: :obj:`types.ChatInviteLink`
+        """
+        expire_date = prepare_arg(expire_date)
+        payload = generate_payload(**locals())
+
+        return await self.request(api.Methods.CREATE_CHAT_INVITE_LINK, payload)
+
+    async def edit_chat_invite_link(self,
+                                    chat_id: typing.Union[base.Integer, base.String],
+                                    invite_link: base.String,
+                                    expire_date: typing.Union[base.Integer, datetime.datetime,
+                                                              datetime.timedelta, None] = None,
+                                    member_limit: typing.Optional[base.Integer] = None,
+                                    ) -> types.ChatInviteLink:
+        """
+        Use this method to edit a non-primary invite link created by the bot.
+        The bot must be an administrator in the chat for this to work and must have
+        the appropriate admin rights.
+
+        Source: https://core.telegram.org/bots/api#editchatinvitelink
+
+        :param chat_id: Unique identifier for the target chat or username of the
+            target channel (in the format @channelusername)
+        :type chat_id: :obj:`typing.Union[base.Integer, base.String]`
+
+        :param invite_link: The invite link to edit
+        :type invite_link: :obj:`base.String`
+
+        :param expire_date: Point in time (Unix timestamp) when the link will expire
+        :type expire_date: :obj:`typing.Union[base.Integer, datetime.datetime,
+            datetime.timedelta, None]`
+
+        :param member_limit: Maximum number of users that can be members of the chat
+            simultaneously after joining the chat via this invite link; 1-99999
+        :type member_limit: :obj:`typing.Optional[base.Integer]`
+
+        :return: edited invite link as a ChatInviteLink object.
+        """
+        expire_date = prepare_arg(expire_date)
+        payload = generate_payload(**locals())
+
+        return await self.request(api.Methods.EDIT_CHAT_INVITE_LINK, payload)
+
+    async def revoke_chat_invite_link(self,
+                                      chat_id: typing.Union[base.Integer, base.String],
+                                      invite_link: base.String,
+                                      ) -> types.ChatInviteLink:
+        """
+        Use this method to revoke an invite link created by the bot.
+        If the primary link is revoked, a new link is automatically generated.
+        The bot must be an administrator in the chat for this to work and must have
+        the appropriate admin rights.
+
+        Source: https://core.telegram.org/bots/api#revokechatinvitelink
+
+        :param chat_id: Unique identifier for the target chat or username of the
+            target channel (in the format @channelusername)
+        :param invite_link: The invite link to revoke
+        :return: the revoked invite link as ChatInviteLink object
+        """
+        payload = generate_payload(**locals())
+
+        return await self.request(api.Methods.REVOKE_CHAT_INVITE_LINK, payload)
 
     async def set_chat_photo(self, chat_id: typing.Union[base.Integer, base.String],
                              photo: base.InputFile) -> base.Boolean:
@@ -1812,8 +1916,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         files = {}
         prepare_file(payload, files, 'photo', photo)
 
-        result = await self.request(api.Methods.SET_CHAT_PHOTO, payload, files)
-        return result
+        return await self.request(api.Methods.SET_CHAT_PHOTO, payload, files)
 
     async def delete_chat_photo(self, chat_id: typing.Union[base.Integer, base.String]) -> base.Boolean:
         """
@@ -1832,8 +1935,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.DELETE_CHAT_PHOTO, payload)
-        return result
+        return await self.request(api.Methods.DELETE_CHAT_PHOTO, payload)
 
     async def set_chat_title(self, chat_id: typing.Union[base.Integer, base.String],
                              title: base.String) -> base.Boolean:
@@ -1855,8 +1957,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_CHAT_TITLE, payload)
-        return result
+        return await self.request(api.Methods.SET_CHAT_TITLE, payload)
 
     async def set_chat_description(self, chat_id: typing.Union[base.Integer, base.String],
                                    description: typing.Optional[base.String] = None) -> base.Boolean:
@@ -1875,8 +1976,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_CHAT_DESCRIPTION, payload)
-        return result
+        return await self.request(api.Methods.SET_CHAT_DESCRIPTION, payload)
 
     async def pin_chat_message(self,
                                chat_id: typing.Union[base.Integer, base.String],
@@ -1908,8 +2008,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.PIN_CHAT_MESSAGE, payload)
-        return result
+        return await self.request(api.Methods.PIN_CHAT_MESSAGE, payload)
 
     async def unpin_chat_message(self,
                                  chat_id: typing.Union[base.Integer, base.String],
@@ -1937,8 +2036,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.UNPIN_CHAT_MESSAGE, payload)
-        return result
+        return await self.request(api.Methods.UNPIN_CHAT_MESSAGE, payload)
 
     async def unpin_all_chat_messages(self,
                                       chat_id: typing.Union[base.Integer, base.String],
@@ -1960,8 +2058,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.UNPIN_ALL_CHAT_MESSAGES, payload)
-        return result
+        return await self.request(api.Methods.UNPIN_ALL_CHAT_MESSAGES, payload)
 
     async def leave_chat(self, chat_id: typing.Union[base.Integer, base.String]) -> base.Boolean:
         """
@@ -1976,8 +2073,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.LEAVE_CHAT, payload)
-        return result
+        return await self.request(api.Methods.LEAVE_CHAT, payload)
 
     async def get_chat(self, chat_id: typing.Union[base.Integer, base.String]) -> types.Chat:
         """
@@ -2029,8 +2125,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.GET_CHAT_MEMBERS_COUNT, payload)
-        return result
+        return await self.request(api.Methods.GET_CHAT_MEMBERS_COUNT, payload)
 
     async def get_chat_member(self, chat_id: typing.Union[base.Integer, base.String],
                               user_id: base.Integer) -> types.ChatMember:
@@ -2071,8 +2166,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_CHAT_STICKER_SET, payload)
-        return result
+        return await self.request(api.Methods.SET_CHAT_STICKER_SET, payload)
 
     async def delete_chat_sticker_set(self, chat_id: typing.Union[base.Integer, base.String]) -> base.Boolean:
         """
@@ -2091,8 +2185,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.DELETE_CHAT_STICKER_SET, payload)
-        return result
+        return await self.request(api.Methods.DELETE_CHAT_STICKER_SET, payload)
 
     async def answer_callback_query(self, callback_query_id: base.String,
                                     text: typing.Optional[base.String] = None,
@@ -2126,8 +2219,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.ANSWER_CALLBACK_QUERY, payload)
-        return result
+        return await self.request(api.Methods.ANSWER_CALLBACK_QUERY, payload)
 
     async def set_my_commands(self, commands: typing.List[types.BotCommand]) -> base.Boolean:
         """
@@ -2144,8 +2236,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         commands = prepare_arg(commands)
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_MY_COMMANDS, payload)
-        return result
+        return await self.request(api.Methods.SET_MY_COMMANDS, payload)
 
     async def get_my_commands(self) -> typing.List[types.BotCommand]:
         """
@@ -2391,8 +2482,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.DELETE_MESSAGE, payload)
-        return result
+        return await self.request(api.Methods.DELETE_MESSAGE, payload)
 
     # === Stickers ===
     # https://core.telegram.org/bots/api#stickers
@@ -2533,8 +2623,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         prepare_file(payload, files, 'png_sticker', png_sticker)
         prepare_file(payload, files, 'tgs_sticker', tgs_sticker)
 
-        result = await self.request(api.Methods.CREATE_NEW_STICKER_SET, payload, files)
-        return result
+        return await self.request(api.Methods.CREATE_NEW_STICKER_SET, payload, files)
 
     async def add_sticker_to_set(self,
                                  user_id: base.Integer,
@@ -2579,8 +2668,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         prepare_file(payload, files, 'png_sticker', png_sticker)
         prepare_file(payload, files, 'tgs_sticker', tgs_sticker)
 
-        result = await self.request(api.Methods.ADD_STICKER_TO_SET, payload, files)
-        return result
+        return await self.request(api.Methods.ADD_STICKER_TO_SET, payload, files)
 
     async def set_sticker_position_in_set(self, sticker: base.String, position: base.Integer) -> base.Boolean:
         """
@@ -2596,9 +2684,8 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         :rtype: :obj:`base.Boolean`
         """
         payload = generate_payload(**locals())
-        result = await self.request(api.Methods.SET_STICKER_POSITION_IN_SET, payload)
 
-        return result
+        return await self.request(api.Methods.SET_STICKER_POSITION_IN_SET, payload)
 
     async def delete_sticker_from_set(self, sticker: base.String) -> base.Boolean:
         """
@@ -2613,8 +2700,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.DELETE_STICKER_FROM_SET, payload)
-        return result
+        return await self.request(api.Methods.DELETE_STICKER_FROM_SET, payload)
 
     async def set_sticker_set_thumb(self,
                                     name: base.String,
@@ -2646,8 +2732,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         files = {}
         prepare_file(payload, files, 'thumb', thumb)
 
-        result = await self.request(api.Methods.SET_STICKER_SET_THUMB, payload, files)
-        return result
+        return await self.request(api.Methods.SET_STICKER_SET_THUMB, payload, files)
 
     async def answer_inline_query(self, inline_query_id: base.String,
                                   results: typing.List[types.InlineQueryResult],
@@ -2690,8 +2775,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         results = prepare_arg(results)
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.ANSWER_INLINE_QUERY, payload)
-        return result
+        return await self.request(api.Methods.ANSWER_INLINE_QUERY, payload)
 
     # === Payments ===
     # https://core.telegram.org/bots/api#payments
@@ -2839,8 +2923,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
                                             for shipping_option in shipping_options])
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.ANSWER_SHIPPING_QUERY, payload)
-        return result
+        return await self.request(api.Methods.ANSWER_SHIPPING_QUERY, payload)
 
     async def answer_pre_checkout_query(self, pre_checkout_query_id: base.String, ok: base.Boolean,
                                         error_message: typing.Optional[base.String] = None) -> base.Boolean:
@@ -2867,8 +2950,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         """
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.ANSWER_PRE_CHECKOUT_QUERY, payload)
-        return result
+        return await self.request(api.Methods.ANSWER_PRE_CHECKOUT_QUERY, payload)
 
     # === Games ===
     # https://core.telegram.org/bots/api#games
@@ -2899,8 +2981,7 @@ class Bot(BaseBot, DataMixin, ContextInstanceMixin):
         errors = prepare_arg(errors)
         payload = generate_payload(**locals())
 
-        result = await self.request(api.Methods.SET_PASSPORT_DATA_ERRORS, payload)
-        return result
+        return await self.request(api.Methods.SET_PASSPORT_DATA_ERRORS, payload)
 
     # === Games ===
     # https://core.telegram.org/bots/api#games
